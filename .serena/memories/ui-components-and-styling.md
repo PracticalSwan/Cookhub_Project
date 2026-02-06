@@ -1,0 +1,1 @@
+UI layer: reusable components for Button (variants + loading), Input, Card, Badge, Table, Tabs (local context), Modal (portal + ESC close). Layout components: Navbar (user actions, create, profile), Sidebar (admin nav). Tailwind v4 custom colors in index.css, global styles, animations (animate-page-in), hover-lift utility. Icons from lucide-react.

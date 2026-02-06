@@ -1,0 +1,248 @@
+%% Converted from data_flow_graphviz.py (best-effort)
+
+flowchart LR
+    %% Context (from build_context_dfd)
+    subgraph Context
+    direction LR
+    User["User"]
+    Admin["Admin"]
+    Contributor["Contributor"]
+    Guest["Guest (Pending/Suspended)"]
+    System(("Recipe Sharing System"))
+
+    UsersDB[("Users DB")]
+    RecipesDB[("Recipes DB")]
+    ReviewsDB[("Reviews DB")]
+    SearchHistory[("Search History")]
+    DailyStats[("Daily Stats")]
+    ActivityLog[("Activity Log")]
+    SessionStore[("Session Store")]
+
+    User --|Credentials / Signup Data|--> System
+    System --|Auth Result / Session|--> User
+    System --|Auth Result / Session|--> Admin
+    System --|Auth Result / Session|--> Contributor
+    System --|Auth Result / Session|--> Guest
+
+    Contributor --|Browse/Search / View Detail|--> System
+    Guest --|Browse/Search / View Detail|--> System
+    System --|Recipe Listings / Detail|--> Contributor
+    System --|Recipe Listings / Detail|--> Guest
+
+    Contributor --|Likes, Favorites, Reviews|--> System
+    System --|Updates / Confirmations|--> Contributor
+    Admin --|Moderation / Stats Requests|--> System
+    System --|Results / Analytics|--> Admin
+
+    System --> UsersDB
+    System --> RecipesDB
+    System --> ReviewsDB
+    System --> SearchHistory
+    System --> DailyStats
+    System --> ActivityLog
+    System --> SessionStore
+
+    end
+
+%% Level 1 (from build_level1_dfd)
+    subgraph Level1
+    direction LR
+    U1["User"]
+    A1["Admin"]
+    C1["Contributor"]
+    G1["Guest (Pending/Suspended)"]
+
+    P1["Authenticate & Register"]
+    P2["Session & Role Management"]
+    P3["Browse/Search Recipes"]
+    P4["View Recipe Detail"]
+    P5["Likes & Favorites"]
+    P6["Reviews & Ratings"]
+    P6b["Delete Review"]
+    P7["Create/Edit/Delete Recipe"]
+    P8["Profile Management"]
+    P9["Admin User Moderation"]
+    P10["Admin Recipe Moderation"]
+    P11["Analytics & Activity Logging"]
+
+    D1[("Users DB")]
+    D2[("Recipes DB")]
+    D3[("Reviews DB")]
+    D4[("Search History")]
+    D5[("Daily Stats")]
+    D6[("Activity Log")]
+    D7[("Session Store")]
+
+    U1 --|Login/Signup Data|--> P1
+    P1 --|Auth Result|--> U1
+    P1 --> D1
+    P1 --|Session Token|--> P2
+    P1 --|Signup Activity|--> D6
+    P1 --|New User Stats|--> D5
+
+    P2 --> D7
+    D7 --> P2
+    P2 --|Role/Status|--> U1
+    P2 --|Admin|--> A1
+    P2 --|Contributor|--> C1
+    P2 --|Guest|--> G1
+    P2 --|Active User Ping|--> D5
+
+    C1 --|Search / Filter|--> P3
+    G1 --|Search / Filter|--> P3
+    P3 --|Recipe List|--> C1
+    P3 --|Recipe List|--> G1
+    P3 --> D2
+    P3 --> D4
+
+    C1 --|Recipe ID|--> P4
+    G1 --|Recipe ID|--> P4
+    P4 --|Detail|--> C1
+    P4 --|Detail|--> G1
+    P4 --> D2
+    P4 --> D5
+
+    C1 --|Like/Favorite|--> P5
+    P5 --> D1
+    P5 --> D2
+
+    C1 --|Review Data|--> P6
+    P6 --> D3
+
+    C1 --|Recipe Form|--> P7
+    P7 --> D2
+    P7 --> D6
+
+    C1 --|Profile Updates|--> P8
+    P8 --> D1
+
+    A1 --|User Actions|--> P9
+    P9 --> D1
+    P9 --> D6
+
+    A1 --|Recipe Actions|--> P10
+    P10 --> D2
+    P10 --> D6
+
+    A1 --|Stats Request|--> P11
+    P11 --> D5
+    P11 --> D6
+    P11 --|Dashboard Stats|--> A1
+
+    end
+
+%% Level 2 (from build_level2_dfd)
+    subgraph Level2
+    direction LR
+    U2["User"]
+    A2["Admin"]
+    C2["Contributor"]
+    G2["Guest (Pending/Suspended)"]
+
+    P10b["Validate Credentials"]
+    P11b["Create Account"]
+    P12["Check Status & Role"]
+    P13["Start Session"]
+    P14["Browse/Search Recipes"]
+    P15["Save Search History"]
+    P16["View Recipe Detail"]
+    P17["Record View"]
+    P18["Toggle Like"]
+    P19["Toggle Favorite"]
+    P20b["Add/Update Review"]
+    P20c["Delete Review"]
+    P21a["Validate Recipe Input"]
+    P21b["Create/Edit Recipe"]
+    P22["Delete Own Recipe"]
+    P23["Update Profile"]
+    P24["Manage Users"]
+    P25["Manage Recipes"]
+    P26["View Dashboard Stats"]
+    P27["Review Activity Log"]
+
+    D10[("Users DB")]
+    D11[("Recipes DB")]
+    D12[("Reviews DB")]
+    D13[("Search History")]
+    D14[("Daily Stats")]
+    D15[("Session Store")]
+    D16[("Activity Log")]
+
+    U2 --|Login Data|--> P10b
+    P10b --|User Lookup|--> D10
+    D10 --|User Record|--> P10b
+    P10b --|Auth Result|--> U2
+
+    U2 --|Signup Data|--> P11b
+    P11b --|New User (Pending)|--> D10
+    P11b --|Account Created|--> U2
+    P11b --|Signup Activity|--> D16
+    P11b --|New User Stats|--> D14
+
+    P10b --|User Status|--> P12
+    D10 --|Status|--> P12
+    P12 --|Admin/Contributor/Guest|--> P13
+    P13 --|Session|--> D15
+    P13 --|Session/Role|--> U2
+    P13 --|Admin|--> A2
+    P13 --|Contributor|--> C2
+    P13 --|Guest|--> G2
+    P13 --|Active User Ping|--> D14
+
+    C2 --|Search / Filter|--> P14
+    G2 --|Search / Filter|--> P14
+    P14 --|Recipe List|--> D11
+    P14 --|Recipe List|--> C2
+    P14 --|Recipe List|--> G2
+    P14 --|Search Query|--> P15
+    P15 --|Search Entry|--> D13
+
+    C2 --|View Detail|--> P16
+    G2 --|View Detail|--> P16
+    P16 --|Recipe Data|--> D11
+    P16 --|View Event|--> P17
+    P17 --|Viewers Update|--> D11
+    P17 --|View Stats|--> D14
+
+    C2 --|Like|--> P18
+    P18 --|Recipe Likes|--> D11
+
+    C2 --|Favorite|--> P19
+    P19 --|User Favorites|--> D10
+
+    C2 --|Review|--> P20b
+    P20b --|Review Record|--> D12
+
+    C2 --|Delete Review|--> P20c
+    P20c --|Remove Review|--> D12
+
+    C2 --|Recipe Form|--> P21a
+    P21a --|Validation Errors|--> C2
+    P21a --|Valid Data|--> P21b
+    P21b --|Recipe Save|--> D11
+
+    C2 --|Delete Recipe|--> P22
+    P22 --|Remove Recipe|--> D11
+    P22 --|Remove Reviews|--> D12
+    P22 --|Clean Favorites|--> D10
+
+    C2 --|Profile Updates|--> P23
+    P23 --|Profile Save|--> D10
+
+    A2 --|User Actions|--> P24
+    P24 --|User Updates|--> D10
+    P24 --|Admin Activity|--> D16
+
+    A2 --|Recipe Actions|--> P25
+    P25 --|Recipe Updates|--> D11
+    P25 --|Admin Activity|--> D16
+
+    A2 --|Stats Request|--> P26
+    P26 --|Metrics|--> D14
+    P26 --|Dashboard Stats|--> A2
+
+    A2 --|Activity Review|--> P27
+    P27 --|Activity Feed|--> D16
+    P27 --|Activity Feed|--> A2
+
+    end

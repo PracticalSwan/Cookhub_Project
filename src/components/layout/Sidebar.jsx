@@ -1,0 +1,63 @@
+import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { cn } from '../../lib/utils';
+import { LayoutDashboard, Users, FileText, LogOut, Settings } from 'lucide-react';
+
+const NAV_ITEMS = [
+    { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { label: 'Users', href: '/admin/users', icon: Users },
+    { label: 'Recipes', href: '/admin/recipes', icon: FileText },
+];
+
+export function Sidebar() {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
+    return (
+        <aside className="fixed inset-y-0 left-0 z-50 w-64 border-r border-cool-gray-20 bg-white shadow-sm flex flex-col">
+            <div className="flex h-16 items-center border-b border-cool-gray-20 px-6">
+                <Link to="/admin" className="text-xl font-bold text-cool-gray-90">
+                    CookHub <span className="text-xs font-normal text-cool-gray-60 bg-cool-gray-10 px-2 py-1 rounded-full ml-2">Admin</span>
+                </Link>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+                {NAV_ITEMS.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                        <Link
+                            key={item.href}
+                            to={item.href}
+                            className={cn(
+                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                                isActive
+                                    ? "bg-cool-gray-90 text-[#FFFFFF]"
+                                    : "text-cool-gray-60 hover:bg-cool-gray-10 hover:text-cool-gray-90"
+                            )}
+                        >
+                            <item.icon className={cn("h-4 w-4", isActive ? "text-[#FFFFFF]" : "text-inherit")} />
+                            <span className={isActive ? "text-[#FFFFFF]" : "text-inherit"}>{item.label}</span>
+                        </Link>
+                    );
+                })}
+            </div>
+
+            <div className="border-t border-cool-gray-20 p-4">
+                <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+    );
+}

@@ -1,0 +1,103 @@
+flowchart TB
+  %% Application flowchart
+  Start((Start: User visits app))
+  AuthAction{Login or Sign Up?}
+  Start --> AuthAction
+
+  %% Login flow
+  LoginStep1[Enter email & password]
+  LoginStep2{Credentials valid?}
+  LoginError[Show error]
+  AdminCheck{Admin credentials?}
+  AccountStatus{Account status?}
+  AuthAction --> LoginStep1
+  LoginStep1 --> LoginStep2
+  LoginStep2 --> LoginError
+  LoginError --> LoginStep1
+  LoginStep2 --> AdminCheck
+  AdminCheck --> AdminEntry[Enter Admin mode]
+  AdminCheck --> AccountStatus
+  AccountStatus --> GuestEntry[Enter Guest mode]
+  AccountStatus --> ContributorEntry[Enter Contributor mode]
+
+  %% Signup flow
+  SignupStep1[Enter registration details]
+  SignupStep2[Create user<br/>role: user, status: pending]
+  SignupStep3[Auto-login - Pending]
+  AuthAction --> SignupStep1
+  SignupStep1 --> SignupStep2
+  SignupStep2 --> SignupStep3
+  SignupStep3 --> GuestEntry
+
+  %% Exit
+  End((End))
+  AuthAction --> End
+
+  %% Guest Mode
+  subgraph Guest["User - Guest mode"]
+    direction TB
+    GuestAction{Action?}
+    GuestBrowse[View approved recipes]
+    GuestDetail[Recipe detail page]
+    GuestBlock[Show message:<br/>Pending approval]
+    GuestLogout[Clear session]
+    GuestEntry --> GuestAction
+    GuestAction --> GuestBrowse
+    GuestAction --> GuestDetail
+    GuestAction --> GuestBlock
+    GuestAction --> GuestLogout
+  end
+
+  %% Contributor Mode
+  subgraph Contrib["User - Contributor mode"]
+    direction TB
+    ContributorAction{Action?}
+    ContribBrowse[View approved recipes]
+    ContribDetail[Recipe detail page]
+    ContribLike[Toggle like]
+    ContribSave[Toggle favorite]
+    ContribReview[Write/edit review]
+    ContribProfile[Edit profile]
+    CreateStep1[Fill recipe form]
+    CreateStep2{Form valid?}
+    CreateError[Show validation error]
+    CreateStep3[Save recipe - Pending]
+    EditOwn[Edit/Delete recipe]
+    ContribLogout[Clear session]
+    ContributorEntry --> ContributorAction
+    ContributorAction --> ContribBrowse
+    ContributorAction --> ContribDetail
+    ContributorAction --> ContribLike
+    ContributorAction --> ContribSave
+    ContributorAction --> ContribReview
+    ContributorAction --> ContribProfile
+    ContributorAction --> CreateStep1
+    CreateStep1 --> CreateStep2
+    CreateStep2 --> CreateError
+    CreateStep2 --> CreateStep3
+    CreateStep3 --> ContributorAction
+    ContributorAction --> EditOwn
+    ContributorAction --> ContribLogout
+  end
+
+  %% Admin Mode
+  subgraph Admin["Admin mode"]
+    direction TB
+    AdminAction{Admin Action?}
+    AdminStats[View dashboard stats]
+    AdminUsers[Approve/Suspend/Delete users]
+    AdminRecipes[Approve/Reject/Delete recipes]
+    AdminLog[View activity log]
+    AdminLogout[Clear session]
+    AdminEntry --> AdminAction
+    AdminAction --> AdminStats
+    AdminAction --> AdminUsers
+    AdminAction --> AdminRecipes
+    AdminAction --> AdminLog
+    AdminAction --> AdminLogout
+  end
+
+  %% Common logouts
+  GuestLogout --> End
+  ContribLogout --> End
+  AdminLogout --> End
