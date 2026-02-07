@@ -66,6 +66,7 @@ Thumbs.db
 # IDE specific files
 *.code-workspace
 .vscode/settings.json
+.claude/
 
 # Temporary files
 tmp/
