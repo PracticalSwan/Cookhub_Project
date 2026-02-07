@@ -1,8 +1,8 @@
 ---
 goal: Dedicated Guest Mode Feature Implementation - Read-only browsing without metrics tracking
-version: 1.0
+version: 1.1
 date_created: 2025-02-07
-last_updated: 2025-02-07
+last_updated: 2026-02-08
 owner: Project Team
 status: 'Planned'
 tags: ['feature', 'guest-mode', 'authentication', 'testing', 'playwright']
@@ -31,8 +31,9 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 - **FREQ-G-011**: Guest mode MUST redirect to login when accessing profile pages
 - **FREQ-G-012**: Guest mode MUST NOT appear in user management dashboard
 - **FREQ-G-013**: Guests must be able to switch to login/signup mode without page reload
-- **FREQ-G-014**: Guest ID must persist in localStorage for session duration only
+- **FREQ-G-014**: Guest ID must persist in localStorage across page refreshes until explicit logout or browser close
 - **FREQ-G-015**: Guest mode must not record any activity in activity logs
+- **FREQ-G-016**: System must gracefully handle localStorage disabled in browser with clear error message for all Guest mode operations
 
 ### Technical Constraints
 
@@ -41,10 +42,12 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 - **GUEST-CON-003**: Guest search history stored in localStorage (client-side only)
 - **GUEST-CON-004**: Guest mode state must be tracked in AuthContext
 - **GUEST-CON-005**: No changes required to localStorage schema (reuse existing GUEST_ID key)
+- **GUEST-CON-006**: Guest mode must fail gracefully if localStorage is unavailable (disabled in browser, storage quota exceeded)
+- **GUEST-CON-007**: Guest state must be synchronized across multiple tabs using storage event listeners
 
 ### Data Requirements
 
-- **DATA-G-001**: Guests must have a unique guest ID (format: `guest-{randomId}`)
+- **DATA-G-001**: Guests must have a unique guest ID (format: `__GUEST__{randomId}`)
 - **DATA-G-002**: Guest IDs must NOT be recorded in `daily_stats.views`
 - **DATA-G-003**: Guest IDs must NOT be recorded in `daily_stats.activeUsers`
 
@@ -53,7 +56,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 - **SEC-G-001**: Guest mode must have same access control as Pending/Suspended users
 - **SEC-G-002**: Guest mode must not expose any user management features
 - **SEC-G-003**: Guest mode must not expose admin endpoints or routes
-- **SEC-G-004**: Guest session must be cleared on browser close (localStorage only)
+- **SEC-G-004**: Guest session persists across page refreshes in localStorage and is cleared on explicit logout or browser close
 - **SEC-G-005**: Guest mode must prevent privilege escalation to admin roles
 
 ### Testing Requirements
@@ -78,19 +81,20 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 
 ## 2. Implementation Steps
 
-### Implementation Phase 1: Core Guest Mode State Management
+### Implementation Phase 1: Core Guest Mode State Management (Estimated: 2-3 hours)
 
 - GOAL-001: Implement guest mode state tracking and session logic in AuthContext and storage layer
 
 | Task    | Description                                                   | Completed | Date       |
 | -------- | ------------------------------------------------------------- | --------- | ---------- |
 | TASK-001 | Update `src/context/AuthContext.jsx` - Add `isGuest` state variable with useState hook |           |            |
-| TASK-002 | Update `src/context/AuthContext.jsx` - Add `enterGuestMode()` function to set guest state and generate guest ID |           |            |
+| TASK-002 | Update `src/context/AuthContext.jsx` - Add `enterGuestMode()` function to set guest state and generate guest ID with localStorage availability check |           |            |
 | TASK-003 | Update `src/context/AuthContext.jsx` - Modify `canInteract` to return false for guests (same as pending/suspended users) |           |            |
-| TASK-004 | Update `src/lib/storage.js` - Modify `recordView()` to skip daily_stats.views recording for guests with viewer Key pattern `guest:{id}` |           |            |
-| TASK-005 | Update `src/lib/storage.js` - Modify `recordActiveUser()` and `recordNewUser()` to skip processing for guest IDs |           |            |
+| TASK-004 | Update `src/lib/storage.js` - Modify `recordView()` to skip daily_stats.views recording for guests using `__GUEST__{id}` prefix pattern and isGuest flag check |           |            |
+| TASK-005 | Update `src/lib/storage.js` - Modify `recordActiveUser()` and `recordNewUser()` to skip processing for guest IDs with robust prefix matching |           |            |
+| TASK-046 | Update `src/context/AuthContext.jsx` - Add storage event listener to synchronize guest state across multiple tabs |           |            |
 
-### Implementation Phase 2: Guest Mode Entry UI
+### Implementation Phase 2: Guest Mode Entry UI (Estimated: 1-2 hours)
 
 - GOAL-002: Add "Continue as Guest" option to authentication pages
 
@@ -99,7 +103,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 | TASK-006 | Update `src/pages/Auth/Login.jsx` - Add "Continue as Guest" button with styling consistent with existing UI |           |            |
 | TASK-007 | Update `src/pages/Auth/Signup.jsx` - Add "Continue as Guest" button with consistent styling and messaging |           |            |
 
-### Implementation Phase 3: Navigation Updates for Guest Mode
+### Implementation Phase 3: Navigation Updates for Guest Mode (Estimated: 1-2 hours)
 
 - GOAL-003: Update navigation components to reflect guest state and provide login/signup options
 
@@ -108,7 +112,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 | TASK-008 | Update `src/components/layout/Navbar.jsx` - Show "Guest" badge and Login/Signup buttons when in guest mode |           |            |
 | TASK-009 | Update `src/components/layout/Sidebar.jsx` - Update menu items to hide Profile link and show Login/Signup for guests |           |            |
 
-### Implementation Phase 4: Feature Blocking for Guest Interactions
+### Implementation Phase 4: Feature Blocking for Guest Interactions (Estimated: 2-3 hours)
 
 - GOAL-004: Block all interactive features for guests with appropriate UI messaging
 
@@ -119,7 +123,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 | TASK-012 | Update `src/pages/Recipe/Profile.jsx` - Add useEffect to redirect guests to login page if isGuest is true |           |            |
 | TASK-013 | Verify `src/pages/Admin/*.jsx` - Confirm admin pages already block access for non-admin users (includes guests) |           |            |
 
-### Implementation Phase 5: Playwright Testing Setup
+### Implementation Phase 5: Playwright Testing Setup (Estimated: 1-2 hours)
 
 - GOAL-005: Initialize Playwright test framework and configuration
 
@@ -127,11 +131,11 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 | -------- | ------------------------------------------------------------- | --------- | ---------- |
 | TASK-014 | Install Playwright and required dependencies in project root via npm/pnpm |           |            |
 | TASK-015 | Create `playwright.config.js` - Configure Playwright for Vite/React testing environment |           |            |
-| TASK-016 | Create `tests/guest-mode.spec.js` - Set up test file structure with fixture definitions |           |            |
+| TASK-016 | Create `tests/guest-mode.spec.js` - Set up test file structure with fixture definitions and localStorage teardown function to clear state between tests |           |            |
 
-### Implementation Phase 6: Guest Mode Functionality Testing
+### Implementation Phase 6: Guest Mode Functionality Testing (Estimated: 3-4 hours)
 
-- GOAL-006: Write comprehensive Playwright tests for guest mode features and blocks
+- GOAL-006: Write comprehensive Playwright tests for guest mode features and blocks with proper localStorage cleanup
 
 | Task    | Description                                                   | Completed | Date       |
 | -------- | ------------------------------------------------------------- | --------- | ---------- |
@@ -141,7 +145,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 | TASK-020 | Write Playwright test: Guest search - verify can search and filter recipes |           |            |
 | TASK-021 | Write Playwright test: Guest recipe detail view - verify can view recipe details |           |            |
 
-### Implementation Phase 7: Guest Mode Blocking Verification
+### Implementation Phase 7: Guest Mode Blocking Verification (Estimated: 2-3 hours)
 
 - GOAL-007: Write tests to verify all interactive features are blocked for guests
 
@@ -153,9 +157,10 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 | TASK-025 | Write Playwright test: RecipeCreationBlocking - verify CreateRecipe page shows login prompt for guests |           |            |
 | TASK-026 | Write Playwright test: ProfileRedirect - verify guests are redirected to login when accessing profile |           |            |
 
-### Implementation Phase 8: Analytics Verification Testing
+### Implementation Phase 8: Analytics Verification Testing (Estimated: 2-3 hours)
 
 - GOAL-008: Create tests to confirm guests do not contribute to analytics metrics
+- **Recommended Early Verification**: After completing Phase 4, run quick analytics smoke test to confirm no guest metrics are being recorded. This allows early detection of issues before full test suite development.
 
 | Task    | Description                                                   | Completed | Date       |
 |--------|-------------------------------------------------------------|-----------|-------------|
@@ -164,7 +169,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 | TASK-029 | Write Playwright test: ActiveUserNotCounted - verify guests are not in daily_stats.activeUsers array |           |            |
 | TASK-030 | Write Playwright test: SearchHistoryLocalStorageOnly - verify guest search history exists in localStorage but not in server stats |           |            |
 
-### Implementation Phase 9: Mode Transition Testing
+### Implementation Phase 9: Mode Transition Testing (Estimated: 1-2 hours)
 
 - GOAL-009: Test transitions between guest, logged-in, and logged-out states
 
@@ -176,7 +181,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 | TASK-034 | Write Playwright test: LogoutToGuest - verify logged-in user can logout and re-enter guest mode |           |            |
 | TASK-035 | Write Playwright test: GuestSessionPersistence - verify guest state persists across page navigation |           |            |
 
-### Implementation Phase 10: Chrome DevTools Testing
+### Implementation Phase 10: Chrome DevTools Testing (Estimated: 1-2 hours)
 
 - GOAL-010: Create comprehensive testing procedures using Chrome DevTools
 
@@ -188,7 +193,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 | TASK-039 | Document Network tab inspection - verify no API calls with guest IDs (when backend is added) |           |            |
 | TASK-040 | Document Console error checking - verify no errors when transitioning between modes |           |            |
 
-### Implementation Phase 11: Cross-Browser Testing
+### Implementation Phase 11: Cross-Browser Testing (Estimated: 2-3 hours)
 
 - GOAL-011: Test guest mode functionality across different browsers
 
@@ -202,7 +207,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 
 ## 3. Alternatives
 
-### Alternative Approaches Considered
+### Alternative Approaches Considered During Planning Phase
 
 - **ALT-001**: Create dedicated Guest user accounts in database
   - **Decision**: REJECTED
@@ -228,6 +233,35 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
   - **Decision**: REJECTED
   - **Rationale**: AuthContext already manages auth state; adding another store creates complexity
   - **Trade-off**: Would require syncing between Context and external store
+
+- **ALT-006**: Document detailed rollback procedures for guest mode deployment
+  - **Decision**: REJECTED (from assessment feedback)
+  - **Rationale**: Guest mode is client-side localStorage feature; rollback = clear localStorage keys
+  - **Trade-off**: Simple, self-contained rollback mechanism already exists
+  - **Implementation Note**: To "undo" guest mode release, clear localStorage keys (`cookhub_guest_id`, `cookhub_daily_stats` guest entries) and revert code changes via version control
+
+- **ALT-007**: Add detailed task-level time estimates to implementation plan
+  - **Decision**: DEFERRED (modified approach from assessment feedback)
+  - **Rationale**: Task-level estimates unrealistic without implementation experience; phase-level ranges more accurate
+  - **Trade-off**: Less granular timeline tracking but more realistic planning
+  - **Implementation Note**: Added phase-level estimates (e.g., "Phase 1 (2-3 hours)") instead
+
+- **ALT-008**: Create detailed UI mockups and wireframes for guest mode flow
+  - **Decision**: DEFERRED (from assessment feedback)
+  - **Rationale**: Existing UI patterns and PAT-G-004 guideline sufficient; design phase out of scope
+  - **Trade-off**: No visual reference during implementation but leverages existing design system
+  - **Implementation Note**: Follow existing Auth page patterns (Login.jsx, Signup.jsx) for consistency
+
+**Chosen Approach**: Extend existing AuthContext with isGuest state, modify storage.js to skip guest metrics, update UI components to respect guest mode state. This leverages existing infrastructure and maintains consistency.
+
+### Alternative Approaches Considered During Assessment Review
+
+The following items were proposed during plan assessment and have been addressed:
+
+- **ALT-009**: Run analytics verification tests earlier (after Phase 4)
+  - **Decision**: MODIFIED - Keep in Phase 8 but add early verification recommendation
+  - **Rationale**: Testing infrastructure in Phase 5-6 needed first, but early checks prevent late-stage issues
+  - **Implementation Note**: Added "Recommended Early Verification" note to Phase 8 for post-Phase 4 analytics smoke test
 
 **Chosen Approach**: Extend existing AuthContext with isGuest state, modify storage.js to skip guest metrics, update UI components to respect guest mode state. This leverages existing infrastructure and maintains consistency.
 
@@ -259,15 +293,17 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 
 - **FILE-001**: `src/context/AuthContext.jsx`
   - Add `isGuest` state
-  - Add `enterGuestMode()` function
+  - Add `enterGuestMode()` function with localStorage availability check
   - Update `canInteract` logic
+  - Add storage event listener for tab synchronization
   - Export new guest mode functions
 
 - **FILE-002**: `src/lib/storage.js`
-  - Modify `recordView()` to skip stats for guests
+  - Modify `recordView()` to skip stats for guests using `__GUEST__{id}` prefix pattern
   - Modify `recordActiveUser()` to skip guests
   - Modify `recordNewUser()` to skip guests
   - Keep existing `getOrCreateGuestId()` method
+  - Use `__GUEST__{id}` prefix format for guest IDs (instead of `guest:{id}`)
 
 - **FILE-003**: `src/pages/Auth/Login.jsx`
   - Add "Continue as Guest" button
@@ -306,7 +342,68 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 - **FILE-014**: `docs/testing/guest-mode-devtools-checklist.md` - DevTools testing procedures
 - **FILE-015**: `docs/testing/guest-mode-browser-compatibility.md` - Browser testing matrix
 
-## 6. Testing
+## 6. Acceptance Criteria
+
+The Guest Mode feature will be considered complete and ready for deployment when all of the following criteria are met:
+
+### Functional Completeness
+
+- **AC-001**: Users can enter Guest mode from both Login and Signup pages
+- **AC-002**: Guest mode badge appears in Navbar when in guest mode
+- **AC-003**: Guest users can browse all published recipes (Home, Search, RecipeDetail pages)
+- **AC-004**: Guest users can search and filter recipes successfully
+- **AC-005**: Like, Favorite, and Review buttons are disabled for guests with "Login to {action}" messages
+- **AC-006**: CreateRecipe page shows "Login to create recipes" message for guests
+- **AC-007**: Guests are redirected to Login page when accessing Profile page
+- **AC-008**: Admin pages remain inaccessible to guests (blocked by existing guards)
+- **AC-009**: Guests can successfully switch to Login or Signup mode without page reload
+- **AC-010**: Guest state persists across page refreshes until explicit logout or browser close
+- **AC-011**: Guest ID format follows `__GUEST__{randomId}` pattern
+
+### Analytics & Data Integrity
+
+- **AC-012**: Guest recipe views do NOT increment daily_stats.views array
+- **AC-013**: Guest IDs do NOT appear in daily_stats.activeUsers array
+- **AC-014**: Guest search history exists in localStorage with guest ID key
+- **AC-015**: No guest-related entries appear in activity logs
+- **AC-016**: Regular user views/interactions continue to be tracked normally (no regression)
+
+### Testing & Quality
+
+- **AC-017**: All Playwright automated tests pass (guest-mode.spec.js, guest-analytics.spec.js, guest-transitions.spec.js)
+- **AC-018**: Test teardown function successfully clears localStorage between test runs
+- **AC-019**: Manual DevTools checklist completed with all checkboxes verified
+- **AC-020**: Cross-browser testing completed successfully (Chrome, Firefox, Edge, Safari)
+- **AC-021**: Multiple tab synchronization works correctly (storage events trigger updates)
+- **AC-022**: No console errors or warnings when transitioning between modes
+
+### Error Handling & Edge Cases
+
+- **AC-023**: System handles localStorage disabled with clear error message
+- **AC-024**: Guest mode entry fails gracefully if localStorage quota exceeded
+- **AC-025**: Guests accessing protected URLs directly are redirected to Login
+- **AC-026**: No race conditions or state inconsistencies with multiple tabs open in guest mode
+
+### Integration & Compatibility
+
+- **AC-027**: Existing AuthContext functionality remains unchanged (backward compatibility)
+- **AC-028**: storage.js API surface remains backward compatible for existing code
+- **AC-029**: Guest mode works correctly with all existing UI components
+- **AC-030**: Visual design matches existing UI patterns (no jarring transitions)
+
+#### Definition of Done
+
+The Guest Mode feature is **DONE** when:
+
+1. All 30 acceptance criteria (AC-001 through AC-030) are met
+2. All 46 implementation tasks (TASK-001 through TASK-045) are marked as completed
+3. All Playwright automated tests pass consistently (3+ test runs)
+4. Manual testing checklist completed and verified
+5. No open bugs or issues related to guest mode functionality
+6. Documentation updated (README, DevTools checklist, browser compatibility matrix)
+7. Cross-browser verification completed with documented results
+
+## 7. Testing
 
 ### Automated Testing (Playwright)
 
@@ -345,7 +442,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
 ### Manual Testing (Chrome DevTools)
 
 - **TEST-006**: LocalStorage Inspection (TASK-037)
-  - Check `cookhub_guest_id` key exists and has format `guest-{randomId}`
+  - Check `cookhub_guest_id` key exists and has format `__GUEST__{randomId}`
   - Check `cookhub_daily_stats` does NOT contain any entries with guest IDs
   - Check guest search history in `cookhub_search_history` with guest IDs
   - Verify localStorage cleared on explicit logout or browser close
@@ -427,7 +524,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
    - Run cross-browser test matrix
    - Document any browser-specific issues
 
-## 7. Risks & Assumptions
+## 8. Risks & Assumptions
 
 ### Implementation Risks
 
@@ -444,12 +541,17 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
   - **Impact**: Medium - May require unexpected refactoring
 
 - **RISK-004**: localStorage key conflicts or race conditions in concurrent tabs
-  - **Mitigation**: Test with multiple tabs open, use unique guest IDs
-  - **Impact**: Low - Guest mode is stateless by design
+  - **Mitigation**: Implemented storage event listener for tab synchronization (TASK-046), test with multiple tabs open, use unique guest IDs
+  - **Impact**: Low - Addressed with synchronization mechanism
+
 
 - **RISK-005**: Playwright tests may be flaky due to timing issues
   - **Mitigation**: Use explicit waits and assertions, retry failed tests
   - **Impact**: Low - Common testing challenge, manageable
+
+- **RISK-006**: localStorage may be disabled or quota exceeded in certain browsers/user settings
+  - **Mitigation**: Implement try-catch blocks with user-friendly error messages (FREQ-G-016), graceful degradation
+  - **Impact**: Low - Edge case handled with proper error messaging
 
 ### Assumptions
 
@@ -495,7 +597,7 @@ This implementation plan adds a dedicated Guest mode to the Recipe Sharing Syste
   - **Remediation**: Future feature: optional guest account upgrade to registered user
   - **Effort**: Large (backend + database + UI changes)
 
-## 8. Related Specifications / Further Reading
+## 9. Related Specifications / Further Reading
 
 ### Project Documentation
 
