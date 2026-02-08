@@ -93,7 +93,7 @@ A centralized recipe-sharing platform promotes culinary creativity, preserves fa
 - View and manage all system content
 
 **Search & Navigation**
-- Responsive navigation with sidebar
+- Responsive navigation with header
 - Quick search bar on homepage
 - Search results page with filters
 - Browse by category functionality
