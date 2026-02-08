@@ -144,65 +144,6 @@ A centralized recipe-sharing platform promotes culinary creativity, preserves fa
 
 ## 5. Data Models
 
-**User Management & Authentication**
-- User registration with role-based access control (Admin, Contributor, Guest/Pending)
-- Secure login/logout functionality
-- User profile management (bio, avatar, cooking level, location)
-- User status system (Pending → Active after admin approval)
-- User activity tracking (last active timestamp, DAU metrics)
-- Account suspension by administrators
-
-**Recipe Management**
-- Create new recipes with detailed information (title, description, ingredients, instructions)
-- Upload or link recipe images
-- Edit existing recipes (by recipe author)
-- Delete recipes (by author or admin)
-- Recipe submission workflow (Pending → Published after admin approval)
-- Dynamic ingredient sections with quantity and units
-- Recipe categorization (Breakfast, Lunch, Dinner, Dessert, etc.)
-- Difficulty levels (Easy, Medium, Hard)
-- Preparation time and cooking time tracking
-- Serving size specifications
-
-**Recipe Discovery & Interaction**
-- Browsing published recipes in a grid/card layout
-- Advanced search functionality with keyword matching
-- Filter by category and difficulty
-- Sort by newest, most viewed, or most liked
-- View detailed recipe information
-- Interactive ingredient checklist (mark off while cooking)
-- View recipe statistics (preparation time, cooking time, servings, difficulty)
-
-**User Engagement**
-- Like/unlike recipes (one like per user per recipe)
-- Favorite/unfavorite recipes (personal recipe collection)
-- Rate recipes (1-5 stars) with written reviews
-- One review limit per user per recipe to prevent spam
-- View author information and other recipes by same author
-- View recipe view counts and like counts
-
-**Admin Dashboard & Controls**
-- View real-time site analytics and metrics
-- Total users, published recipes, pending recipes statistics
-- Daily active users (DAU) tracking with session heartbeat
-- Daily view counts and engagement metrics
-- User management with status changes (activate/suspend)
-- View detailed user list with filtering
-- Recipe approval workflow (approve/reject pending recipes)
-- Content moderation and deletion
-- Recent activity feed tracking admin actions
-- View and manage all system content
-
-**Search & Navigation**
-- Responsive navigation with sidebar
-- Quick search bar on homepage
-- Search results page with filters
-- Browse by category functionality
-- Personal recipe collection (My Recipes tab)
-- Random recipe discovery feature
-
-## 5. Data Models
-
 The system uses 5 entities to support comprehensive recipe sharing, user management, and platform analytics. All entities support full CRUD operations with role-based access control.
 
 ### Entity 1: User
