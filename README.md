@@ -15,7 +15,6 @@ A collaborative web application that enables users to share, discover, and inter
 - [Available Scripts](#available-scripts)
 - [Project Structure](#project-structure)
 - [Technologies Used](#technologies-used)
-- [System Diagrams](#system-diagrams)
 - [Data Storage](#data-storage)
 - [Support](#support)
 
@@ -327,18 +326,8 @@ recipe-sharing-system/
 ├── guides/                    # Documentation and setup guides
 │   ├── database_implementation_logic_explanation.md
 │   └── SETUP_GUIDE_PHPMYADMIN.md
-├── lucid_diagrams/            # Lucidchart-exported diagrams (PNG/SVG)
-├── mermaid-diagrams/          # Mermaid diagram files (.mmd)
-│   ├── application_flowchart.mmd
-│   └── data-flow-from-py.mmd
 ├── plan/                      # Future development planning documents
 │   └── upgrade-database-integration-1.md
-├── python_diagrams/           # Graphviz Python diagram generators
-│   ├── data_flow_graphviz.py
-│   ├── er_recipe_conceptual_graphviz.py
-│   ├── er_recipe_logical_graphviz.py
-│   ├── flowchart_graphviz.py
-│   └── out/                   # Generated diagram images
 ├── public/                    # Static assets
 ├── src/
 │   ├── components/           # Reusable UI components
@@ -410,64 +399,6 @@ recipe-sharing-system/
 ### Utilities
 - **Clsx** (v2.1.1) - Conditional className utility
 - **date-fns** (v4.1.0) - Modern JavaScript date utility library for formatting and manipulation
-
-<a id="system-diagrams"></a>
-## 📊 System Diagrams
-
-The project includes comprehensive visual documentation to help understand the system architecture, data flows, and relationships. These diagrams are available in two formats:
-
-### Diagram Types
-
-#### 1. **Application Flowchart**
-Illustrates the complete user journey and application workflow, including authentication, role-based access, and feature interactions.
-
-- **Location:** 
-  - Mermaid: [mermaid-diagrams/application_flowchart_clean.mmd](mermaid-diagrams/application_flowchart_clean.mmd)
-  - Graphviz: [python_diagrams/flowchart_graphviz.py](python_diagrams/flowchart_graphviz.py)
-- **Shows:** User flows, decision points, authentication paths, admin workflows, contributor features, and guest limitations
-
-#### 2. **Data Flow Diagram (DFD)**
-Depicts how data moves through the system between users, processes, and storage.
-
-- **Location:** 
-  - Mermaid: [mermaid-diagrams/data-flow-from-py.mmd](mermaid-diagrams/data-flow-from-py.mmd)
-  - Graphviz: [python_diagrams/data_flow_graphviz.py](python_diagrams/data_flow_graphviz.py)
-- **Shows:** Data inputs/outputs, processing flows, localStorage interactions, authentication data flows, and recipe management pipelines
-
-#### 3. **Entity-Relationship Diagrams (ERD)**
-Visualizes the data model with entities, attributes, and relationships used in localStorage.
-
-##### Conceptual ERD
-- **Location:** [python_diagrams/er_recipe_conceptual_graphviz.py](python_diagrams/er_recipe_conceptual_graphviz.py)
-- **Shows:** High-level entities (User, Recipe, Review, etc.) and their relationships without implementation details
-
-##### Logical ERD
-- **Location:** [python_diagrams/er_recipe_logical_graphviz.py](python_diagrams/er_recipe_logical_graphviz.py)
-- **Shows:** Detailed data structure including all attributes, primary keys, foreign keys, and cardinalities
-
-### How to Generate/View Diagrams
-
-**Mermaid Diagrams (.mmd files):**
-- Open in VS Code with Mermaid extension installed
-- Preview using the Mermaid preview feature
-- Render online at [mermaid.live](https://mermaid.live)
-
-**Graphviz Python Diagrams:**
-1. Install Graphviz: 
-   ```bash
-   pip install graphviz
-   ```
-2. Run the Python script:
-   ```bash
-   python python_diagrams/<diagram_name>.py
-   ```
-3. Generated images are saved in `python_diagrams/out/` directory
-
-These diagrams provide comprehensive documentation for understanding the system's architecture, data structures, and user workflows.
-
-#### Lucid Diagrams
-
-- **Location:** `lucid_diagrams/` — contains exported diagram images (PNG or SVG) created in Lucidchart for quick visual reference and presentation.
 
 <a id="data-storage"></a>
 ## 💾 Data Storage
