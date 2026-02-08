@@ -168,7 +168,7 @@ The system uses 5 entities to support comprehensive recipe sharing, user managem
 - searchHistory (array of search query records with query text and timestamp)
 
 **Operations:**
-- **Create**: User registration (POST /api/auth/signup), Admin can create users (POST /api/users)
+- **Create**: User registration (POST /api/auth/signup)
 - **Read**: View own profile (GET /api/users/me), View user by ID (GET /api/users/:id), List all users (GET /api/users - admin only)
 - **Update**: Update own profile (PUT /api/users/me), Admin can update user status (PATCH /api/users/:id/status), Admin can update any user (PUT /api/users/:id)
 - **Delete**: Admin can delete user accounts (DELETE /api/users/:id)
