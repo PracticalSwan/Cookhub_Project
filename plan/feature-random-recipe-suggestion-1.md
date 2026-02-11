@@ -249,8 +249,7 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 - **DEP-RS-CROSS-001**: Guest Mode feature (feature-guest-mode-1.md) - If implemented first, Random Recipe must respect guest mode state (isGuest from AuthContext)
 - **DEP-RS-CROSS-002**: If Random Recipe is implemented first, guest compatibility must be added retroactively when Guest Mode is implemented
-- **DEP-RS-CROSS-003**: Playwright test infrastructure - If Guest Mode is implemented first, reuse existing Playwright config and test patterns from `playwright.config.js`
-
+- **DEP-RS-CROSS-003**: Playwright test infrastructure - If Guest Mode is implemented first, reuse existing Playwright config and test patterns from `playwright.config.js`- **DEP-RS-CROSS-004**: Design Overhaul feature (design-overhaul-1.md) - Preserves Random Recipe functionality by integrating "Surprise Me" button and RecipeSuggestionModal into new design (TASK-OV-011, TASK-OV-018)
 ### Data Dependencies
 
 - **DEP-RS-009**: `getRecipes()` function from storage.js - Returns all recipes including likedBy arrays
@@ -717,6 +716,15 @@ The Random Recipe Suggestion feature is **DONE** when:
 - [Recipe Features](../.serena/memories/recipe-features.md) - Recipe interaction features and data model
 - [UI Components and Styling](../.serena/memories/ui-components-and-styling.md) - Component library and design system
 - [Project Overview](../.serena/memories/project-overview.md) - Overall project architecture
+
+### Implementation Notes
+
+- **Guest Mode Compatibility**: Random Recipe respects Guest Mode analytics blocking (AC-RS-033) - guests can use "Surprise Me" but recipe views don't increment daily_stats.views
+- **Design Overhaul Compatibility**: RecipeSuggestionModal and "Surprise Me" button are integrated into Design Overhaul (design-overhaul-1.md) through:
+  - TASK-OV-011: "Surprise Me" button preserved in new hero design
+  - TASK-OV-018: RecipeSuggestionModal integrated into new Home page design
+  - PREREQ-OV-002: Random Recipe must be completed before Design Overhaul
+- **Implementation Order**: See [IMPLEMENTATION-SEQUENCE-ANALYSIS.md](./IMPLEMENTATION-SEQUENCE-ANALYSIS.md) for complete compatibility analysis
 
 ### Related Implementation Plans
 
