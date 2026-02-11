@@ -1,0 +1,393 @@
+# Design System: Cookhub Home - Recipe Feed
+
+**Project ID:** 12469199353397755583  
+**Device Type:** Desktop  
+**Platform:** Web Application
+
+---
+
+## 1. Visual Theme & Atmosphere
+
+**Mood & Characteristics:**
+- Clean, modern interface with generous whitespace
+- Card-based layouts with clear visual hierarchy
+- Professional yet approachable cooking application
+- Airy breathing room between elements
+- Minimalist aesthetic with intentional information density
+
+**Primary Design Philosophy:**
+- Content-first approach with recipe cards as focal points
+- Distinct separation between sections using spacing and visual containers
+- Consistent visual language across all major screens (13 total)
+
+---
+
+## 2. Color Palette & Roles
+
+### Primary Colors
+- **Brand Accent:** `#137fec` (Light Blue/Teal) - Primary action buttons, active states, emphasis highlights
+- **Background:** White/Off-white - Base surface for card backgrounds and page containers
+- **Surface:** Light gray/white with subtle shadows - Card backgrounds, elevated sections
+
+### Status & Semantic Colors
+- **Success/Active:** Green - Approved recipes, active users, successful actions
+- **Warning/Pending:** Yellow/Amber - Pending reviews, awaiting approval states
+- **Error/Suspended:** Red - Suspended users, rejected recipes, error messages
+- **Info/Muted:** Gray - Secondary text, disabled states, inactive elements
+
+### Text Colors
+- **Primary Text:** Dark gray/black - Headlines, body text, primary content
+- **Secondary Text:** Medium gray - Metadata, timestamps, labels
+- **Placeholder Text:** Light gray - Input placeholders, empty states
+
+---
+
+## 3. Typography Rules
+
+**Font Family:** Work Sans (Google Font)  
+**Font Weight Scale:**
+- **Bold/700+:** Screen titles, recipe names, prominent headings
+- **Semi-bold/600:** Section headings, card titles, prominent labels
+- **Medium/500:** Subheadings, emphasis text, category names
+- **Regular/400:** Body text, descriptions, instructions
+- **Light/300-400:** Secondary text, timestamps, metadata
+
+**Type Scale:**
+- **H1 (Page Titles):** 32-40px - Main section headings
+- **H2 (Card Titles):** 20-24px - Recipe names, user names
+- **H3 (Section Headers):** 16-18px - Form sections, tab labels
+- **Body (Content):** 14-16px - Descriptions, instructions
+- **Small (Metadata):** 12-14px - Time estimates, counts, secondary info
+
+**Line Heights:**
+- **Display/Headings:** 1.1-1.2 (tight spacing for impact)
+- **Body Text:** 1.5-1.6 (readable for recipes, descriptions)
+- **Metadata:** 1.3-1.4 (condensed for secondary text)
+
+---
+
+## 4. Component Stylings
+
+### 4.1 Cards
+- **Border Radius:** 8px (roundness: ROUND_EIGHT)
+- **Box Shadow:** Subtle elevation with soft blur (`shadow-sm` to `shadow-md`)
+- **Structure:**
+  - Recipe Card: Image top, content bottom (title, tags, metadata, actions)
+  - User Card: Avatar left, name/role/stats right
+  - Form Card: Sectioned content with distinct headers
+
+**Recipe Card Pattern:**
+```css
+- Aspect ratio: 4:3 for thumbnails (preserved)
+- Image overlay: Optional badges (difficulty, time) in top-right
+- Spacing: 12-16px padding inside card
+- Title: 2-3 lines max, truncation if longer
+- Metadata row: Icons+text (time, difficulty, likes, reviews)
+```
+
+### 4.2 Buttons
+- **Border Radius:** 8px (consistent with cards)
+- **Primary:** Brand accent `#137fec` background, white text, hover darken
+- **Secondary:** White/gray background, dark text, subtle border
+- **Tertiary:** Text-only buttons (link style), underline hover
+- **States:**
+  - Hover: Slight color shift or opacity change
+  - Active: Invert colors or press effect
+  - Disabled: Grayed out with reduced opacity (50-60%)
+  - Loading: Spinner or disabled text (e.g., "Saving...")
+
+### 4.3 Inputs & Form Controls
+- **Border Radius:** 6-8px (slightly rounded)
+- **Border:** 1px solid #e5e7eb (light gray)
+- **Focus:** Brand accent ring/border `#137fec`
+- **Labels:** Above input, primary text color (dark gray)
+- **Helper Text:** Below input, smaller font (12-14px)
+- **Error State:** Red border/text with error message helper
+
+### 4.4 Modals
+- **Backdrop:** Semi-transparent black (rgba 0,0,0,0.5) with blur
+- **Structure:**
+  - Header: Title + close button (top-right)
+  - Body: Scrollable content area
+  - Footer: Action buttons (cancel/submit)
+- **Animation:** Fade-in with scale or slide-up effect (0.2-0.3s)
+
+### 4.5 Badges & Tags
+- **Border Radius:** 4-6px (pill shape)
+- **Colors:** Muted backgrounds (light colors) with darker text
+- **Sizes:**
+  - Small (status): 12-14px height, compact
+  - Medium (category): 16-20px height, moderate padding
+  - Large (badge): 20-24px height, prominent
+
+### 4.6 Navigation
+- **Navbar:**
+  - Fixed top or sticky
+  - Logo left (text or icon)
+  - Navigation links center
+  - User actions right (profile, notifications)
+  - Mobile: Hamburger menu triggers dropdown
+- **Sidebar (Admin):**
+  - Fixed left
+  - Icon + text navigation items
+  - Active state: Highlighted with brand color or pill indicator
+
+### 4.7 Tables (Admin)
+- **Headers:** Sticky top, sortable with sort indicators
+- **Rows:** Hover highlight, border-bottom separation
+- **Status Badges:** Rendered inline (green/red/yellow pills)
+- **Responsive:** Horizontal scroll on mobile, preserve column layout
+- **Bulk Actions:** Checkbox column left, action buttons right
+
+---
+
+## 5. Layout Principles
+
+### 5.1 Grid Systems
+**Responsive Breakpoints:**
+- **Mobile (< 640px):** 1 column grid, stacked cards/elements
+- **Tablet (640px - 1024px):** 2-3 column grids, side-by-side layouts
+- **Desktop (> 1024px):** 4-5 column grids, full-width utilization
+
+**Spacing Scale (Tailwind-based):**
+- 4: 16px - Small gaps between related items
+- 6: 24px - Medium gaps (between sections)
+- 8: 32px - Large gaps (between major containers)
+- 12: 48px - Very large gaps (page margins)
+- 16: 64px - Extra large gaps (hero sections)
+
+### 5.2 Container Widths
+- **Page Container:** Max-width 1200-1280px (matches Stitch desktop)
+- **Content Area:** 640-960px (readable width for text)
+- **Sidebar Width:** 240-280px (fixed)
+- **Navbar Height:** 64px (fixed or sticky)
+
+### 5.3 Section Patterns
+**Hero Section:**
+- Full-width or centered container
+- Large heading (H1) with supporting subtext
+- Prominent call-to-action button
+- Optional background image with gradient overlay
+
+**Search Section:**
+- Floating search bar with icon and clear button
+- Optional filters (sidebar or dropdown chips)
+- Results grid below with empty state handling
+
+**Recipe Grid:**
+- Regular grid with consistent card sizing
+- Gaps of 16-24px between cards
+- Responsive column adjustment (1→2→3→4)
+
+**Tabbed Content:**
+- Tabs horizontal with active indicator (pill or underline)
+- Content area below with scroll if needed
+- Smooth transitions between tab switches
+
+### 5.4 Visual Hierarchy
+1. **Page Title (H1):** Most prominent, top of content
+2. **Section Headings (H2):** Distinct from body, moderate size
+3. **Card Titles (H2/H3):** Slightly larger than body, emphasis
+4. **Body Text (P):** Readable, proper line height
+5. **Metadata (Small):** Muted color, smaller font, secondary
+
+---
+
+## 6. Accessibility & Interaction
+
+### 6.1 Interactive Elements
+- **Hover States:** All buttons, cards, links have hover feedback
+- **Focus States:** Visible ring/outline (2px around element)
+- **Active States:** Press effect or color inversion
+- **Transitions:** Smooth (0.2-0.3s) using CSS transitions
+
+### 6.2 Keyboard Navigation
+- **Tab Order:** Logical sequence through interactive elements
+- **Enter/Space:** Activate buttons and interactive items
+- **Escape:** Close modals, dismiss dropdowns
+- **Focus Trapping:** Modals keep focus until closed
+
+### 6.3 Loading & Empty States
+- **Loading:** Spinner or skeleton loader, prevent interaction
+- **Empty:** Clear message with illustration/icon
+- **Error:** Friendly error message with retry action
+
+---
+
+## 7. Screen-Specific Patterns
+
+### 7.1 Home (Cookhub Home - Recipe Feed)
+- Hero section with main CTA ("Surprise Me" for random recipe)
+- Search bar prominent, centered below hero
+- Featured recipes section (optional, highlighted cards)
+- Recipe feed grid (4-5 columns)
+- Recipe cards with image, title, metadata (time, difficulty, likes)
+
+### 7.2 Search & Filtering
+- Left sidebar for filters (categories, difficulty, time range)
+- Right panel for results grid
+- Active filter chips above results
+- Empty state when no matches
+
+### 7.3 Recipe Detail
+- Full-width hero image with title/metadata overlay
+- Tabbed content (Ingredients, Instructions, Reviews)
+- Ingredients: Checkable list, quantity styling
+- Instructions: Step numbering, time estimates per step
+
+### 7.4 Authentication (Login/Signup)
+- Centered card on page
+- Form fields with labels and helper text
+- Social auth placeholder buttons
+- "Continue as Guest" button (guest mode integration)
+
+### 7.5 User Profile
+- Profile header (avatar, name, bio, stats)
+- Tabbed navigation (My Recipes, Favorites, Activity)
+- Content grids for each tab
+- Edit Profile modal accessible
+
+### 7.6 Admin Panels
+- Stats cards in dashboard (users, recipes, daily active, pending)
+- Table layout for recipe/user management
+- Bulk actions (checkboxes, multi-select)
+- Status indicators (badges)
+
+---
+
+## 8. Responsive Considerations
+
+### Mobile (< 640px)
+- Single column layouts
+- Collapsible filters (sidebar becomes accordion)
+- Touch targets: Minimum 44x44px
+- Horizontal scrolling for tables
+- Simplified navigation (hamburger menu)
+
+### Tablet (640px - 1024px)
+- 2-3 column grids
+- Visible sidebars (collapsed to icons optional)
+- Responsive card sizing
+- Maintained visual hierarchy
+
+### Desktop (> 1024px)
+- 4-5 column grids
+- Full sidebar visibility
+- Max-width containers for readability
+- Ample whitespace utilization
+
+---
+
+## 9. Design Consistency Notes
+
+**Global Constants:**
+- Border Radius: 8px (buttons, cards, inputs)
+- Primary Color: `#137fec` (brand accent)
+- Font: Work Sans (Google Font)
+- Spacing: Tailwind scale (4, 6, 8, 12, 16)
+
+**Component Reuse:**
+- All modals: Same backdrop, header/footer pattern
+- All cards: Same shadow, radius, content structure
+- All buttons: Same hover/active/disabled states
+- All inputs: Same focus ring, error states
+
+**Pattern Enforcement:**
+- Visual hierarchy strictly follows H1 → H2 → H3 → Body → Metadata
+- Status colors: Green (active), Yellow (pending), Red (suspended)
+- Interactive elements always have hover/focus transitions
+- Empty states always have clear messaging + illustration
+
+---
+
+## 10. Stitch-Screen Reference Mapping
+
+| Screen ID | Title | Design Pattern | Key Components |
+|------------|--------|----------------|----------------|
+| 6a35b85562824db1b1a501edc5f00fa9 | Cookhub Home - Recipe Feed | Hero + Grid | Hero section, search bar, recipe cards |
+| 0c3d91cadee54c5588df173fe6274d6c | Search and Filtering Results | Sidebar + Grid | Filter sidebar, results grid, filter chips |
+| 8cac488c341249a2a1b03c0ca65b3778 | Search Results Empty State | Centered Empty | Empty message, illustration, retry button |
+| d4bb7f8218a042aa9b7270a97d6e3e6d | User Authentication | Centered Card | Login/Signup forms, social auth buttons |
+| caa7bca340144607854ef2514e1c5e93 | Recipe Detail View | Hero + Tabs | Full-width hero, tabbed content, review section |
+| c2c636b8cc2b4c25af090b49dd2e028c | Create New Recipe Form | Multi-section | Form accordion, dynamic lists, image upload |
+| 3e4a18d80f1f412d922d3e89e602b580 | User Profile with Tabs | Header + Tabs | Profile header, tabbed content grids |
+| 22a3e2ccc0734dbea656ba07b0720db1 | Edit Profile Modal Interface | Modal Form | Profile edit form, save/cancel buttons |
+| eaa464a04f24435eb75999e84101439a | Admin Dashboard Overview | Stats Grid | Stats cards, quick actions, charts |
+| 173ac4fe760e4dd39f4426e92a2bee27 | Admin Recipe Management Table | Data Table | Recipe table, bulk actions, status badges |
+| 403a08a1375f49e3a54d8d016520c93c | Admin User Management Table | Data Table | User table, status dropdown, bulk actions |
+| 2c5f3d1da041441b93807d452c8ba469 | Pending User Restricted State | Restricted View | Restricted message, status indicator |
+
+---
+
+## 11. Design Tokens Summary (Tailwind Mapping)
+
+**Colors:**
+```css
+--primary: #137fec;
+--success: #22c55e; /* green */
+--warning: #f59e0b; /* amber */
+--error: #ef4444; /* red */
+--muted: #6b7280; /* gray */
+```
+
+**Spacing:**
+```css
+--spacing-sm: 16px;
+--spacing-md: 24px;
+--spacing-lg: 32px;
+--spacing-xl: 48px;
+--spacing-2xl: 64px;
+```
+
+**Border Radius:**
+```css
+--radius-sm: 6px;
+--radius-md: 8px;
+--radius-lg: 12px;
+```
+
+**Transitions:**
+```css
+--transition-fast: 150ms;
+--transition-base: 200ms;
+--transition-slow: 300ms;
+```
+
+---
+
+## 12. Notes for Implementation
+
+1. **Color Contrast:** Ensure all text meets WCAG AA (4.5:1 for body, 3:1 for large text)
+2. **Image Ratios:** Maintain 4:3 for recipe cards, preserve on responsive resize
+3. **Touch Targets:** 44x44px minimum for mobile interactive elements
+4. **Scroll Behavior:** Smooth scrolling for anchor links, preserve scroll position on nav
+5. **Modal Focus:** Trap focus within modal tab order, return on close
+6. **Lazy Loading:** Implement for recipe images to improve performance
+7. **Skeleton Loaders:** Show during async data fetch to prevent content shift
+8. **Form Validation:** Real-time feedback with clear error messages below inputs
+
+---
+
+## 13. Integration Points
+
+**Guest Mode Integration:**
+- "Continue as Guest" button on Login/Signup screens
+- Guest badge in Navbar (icon + text)
+- Restricted states for interactive elements (disabled with "Login to {action}" message)
+- Profile page redirect to login for guest users
+
+**Random Recipe Integration:**
+- "Surprise Me" button in Home hero section
+- RecipeSuggestionModal for displaying random recipe
+- Loading states during suggestion fetch
+- Quality constraints (>= 5 likes, >= 1 review)
+
+**Event System:**
+- `favoriteToggled`: Dispatch on like/unlike
+- `recipeUpdated`: Dispatch on create/edit/delete
+- Components listen for events to update state immediately
+
+---
+
+**Generated from Stitch Project ID: 12469199353397755583**  
+**Date:** February 11, 2026
