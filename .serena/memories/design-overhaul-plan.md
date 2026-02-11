@@ -1,225 +1,285 @@
-#!/usr/bin/env node
-# Design Overhaul Implementation Plan - Kitchen Odyssey
-**Plan File:** `plan/design-overhaul-1.md`
+# Design Overhaul Plan
 
-*Last reviewed: 2026-02-11*
+## Status: Blocked (until prerequisites complete)
 
-## Overview
-Complete design overhaul for Kitchen Odyssey recipe sharing system based on Google Stitch designs (13 screens).
+**Created**: 2026-02-11  
+**Last Updated**: 2026-02-11  
+**Implementation Sequence**: Phase 3 of 3 (final phase, requires both features complete)
 
-## Current Status: BLOCKED
-**❌ WAITING FOR PREREQUISITE FEATURES TO COMPLETE**
+## Summary
 
-## Key Information
-- **Plan Version:** 1.1 (as of 2026-02-11)
-- **Total Screens:** 13 (all verified available in Stitch project)
-- **Total Tasks:** 113 tasks across 13 implementation phases
-- **Estimated Time:** 40-55 hours
+This plan provides complete UI overhaul transforming Kitchen Odyssey to match modern Google Stitch designs while preserving all existing functionality, logic, and features. The overhaul updates all 13 major screens with improved visual hierarchy, modern component patterns, responsive layouts, and enhanced accessibility.
 
-## Blocking Dependencies
+## Content
 
-Both prerequisites are currently 'Planned' - MUST be 'Completed' before starting:
+This memory contains the complete design overhaul implementation plan as documented in:
+`c:\Assumption University\CSX4107\Assignments\Project2\Kitchen_Odyssey\plan\design-overhaul-1.md`
 
-1. **feature-guest-mode-1.md** - Guest Mode Feature
-   - Current Status: Planned
-   - Required Status: Completed
-   - Required for: Guest badges in Navbar, restricted states in RecipeDetail, CreateRecipe blocking
+## Key Implementation Details
 
-2. **feature-random-recipe-suggestion-1.md** - Random Recipe Suggestion
-   - Current Status: Planned
-   - Required Status: Completed
-   - Required for: Hero "Surprise Me" button, RecipeSuggestionModal integration
+### Scope
+- **13 Complete Screen Redesigns**: All major UI screens updated to Stitch design patterns
+- **Component Enhancement**: Existing UI components enhanced (Modal, Button, Card, Input, Badge, Tabs, Table)
+- **Responsive Design**: Mobile, tablet, desktop layouts with Tailwind breakpoints
+- **Accessibility**: WCAG AA compliance testing and implementation
+- **Hybrid Color System**: Brand identity (#C8102E) + Stitch accent (#137fec)
 
-**Why Blocked:** Both features add components, state, and functionality that the design overhaul must integrate and display. Starting overhaul first would require significant rework.
+### Cross-Feature Integration
+- ✅ **Guest Mode**: Fully integrated with `isGuest` state (TASK-OV-034, TASK-OV-045, TASK-OV-054)
+- ✅ **Random Recipe**: "Surprise Me" and RecipeSuggestionModal integrated (TASK-OV-011, TASK-OV-018)
 
-## Implementation Phases
+## Updates (February 11, 2026)
 
-1. Authentication Pages Redesign (Login/Signup) - 9 tasks, 3-4 hours
-2. Home Page Overhaul - 10 tasks, 4-5 hours
-3. Search Page Redesign - 8 tasks, 3-4 hours
-4. Recipe Detail Overhaul - 10 tasks, 4-5 hours
-5. Create Recipe Form Overhaul - 10 tasks, 4-5 hours
-6. User Profile Overhaul - 10 tasks, 3-4 hours
-7. Admin Dashboard - 5 tasks, 2-3 hours
-8. Admin Table Components - 10 tasks, 3-4 hours
-9. Component Library Enhancements - 8 tasks, 4-5 hours
-10. Layout Component Updates - 7 tasks, 2-3 hours
-11. Responsive Design & Polish - 8 tasks, 3-4 hours
-12. Accessibility & Cross-Browser Testing - 8 tasks, 2-3 hours
-13. Integration Testing & Regression Prevention - 10 tasks, 3-4 hours
+### Version 1.3 - Web Testing Skill Alignment (v1.3)
 
-## Files to Modify
+**Major Addition**: Complete testing sections aligned with [web-testing skill](../../.copilot/skills/web-testing/) guidelines.
 
-**Pages (13 files):**
-- Auth: Login.jsx, Signup.jsx
+#### New Sections Added (6 major sections, ~482 lines)
+
+**Section 6: Web Testing Methodology**
+- Testing Pillars: Playwright automation, Chrome DevTools, accessibility, visual regression, responsive, cross-browser
+- Test Architecture Patterns documented:
+  - Page Object Model (POM) with example LoginPage class
+  - Fixture patterns for authentication state reuse (admin, user, guest)
+  - Global Setup for saving auth states to storage files
+  - Test Structure Best Practices with beforeEach/afterEach hooks and test.step() organization
+- All 8 Page Objects required for kitchen Odyssey screens (AuthPage, HomePage, SearchPage, RecipeDetailPage, CreateRecipePage, ProfilePage, AdminStatsPage, AdminRecipesPage, UserListPage)
+
+**Section 7: Testing Implementation Guide** (Expanded Phase 14)
+- Detailed breakdown of tasks TASK-OV-114 through TASK-OV-128
+- Subtasks defined:
+  - TASK-OV-116-A: Create Page Object classes (8 pages)
+  - TASK-OV-116-B: Create fixtures with auth state reuse
+  - TASK-OV-116-C: Create global setup for auth states
+
+**Section 8: Error Handling & Debugging** (5 test categories)
+- TEST-OV-ERROR-001: Console Error Tracking (per web-testing troubleshooting pattern)
+- TEST-OV-ERROR-002: Network Request Monitoring (per web-testing network debugging pattern)
+- TEST-OV-ERROR-003: JavaScript Exception Handling
+- TEST-OV-ERROR-004: User-Friendly Error Messages
+- TEST-OV-ERROR-005: Network Error Handling
+
+**Section 9: Performance Monitoring** (6 test categories - following Chrome DevTools pattern)
+- TEST-OV-PERF-001: Largest Contentful Paint (LCP) - measure and optimization (< 2.5s target)
+- TEST-OV-PERF-002: Cumulative Layout Shift (CLS) - identify and fix layout shifts (< 0.1 threshold)
+- TEST-OV-PERF-003: First Input Delay (FID) - optimize main thread blocking
+- TEST-OV-PERF-004: Time to Interactive (TTI) - bundle size optimization guides
+- TEST-OV-PERF-005: Bundle Size Monitoring (< 100KB JS per route target)
+- TEST-OV-PERF-006: Rendering Performance - GPU-accelerated animations
+
+**Section 10: Testing Checklist** (from web-testing skill checklist - 6 domains)
+- **Functional Testing** (4 items): user flows, form validation, error handling, edge cases
+- **Responsive Testing** (5 items): mobile (375px, 414px), tablet (768px, 1024px), desktop (1280px, 1440px, 1920px), hamburger menu, no horizontal scrollbars (except tables)
+- **Cross-Browser Testing** (4 items): Chrome, Firefox, Safari/WebKit, Edge
+- **Accessibility Testing** (10 items - expanded from 6): keyboard navigation, focus states, ARIA labels, form labels, alt text, touch targets >= 44x44px, heading hierarchy (H1→H2→H3), form accessibility, color contrast (4.5:1 body, 3:1 large), screen reader announcements
+- **Performance Testing** (7 items): page load < 3s, LCP < 2.5s, CLS < 0.1, optimized images, bundle sizes, console errors, Core Web Vitals
+- **Error Handling** (5 items): console errors logged, failed network requests, 404s fixed, 500s investigated, user-friendly messages
+
+#### Enhanced Existing Sections
+
+**Section 13 (Dynamic Data Testing)**: Expanded from undefined to 5 specific data scenarios
+- Empty state, 1 item, 10 items, 100 items, edge cases (invalid data, very long text, unicode)
+- All 8 critical screens tested with 5 scenarios = 40 data validation tests
+
+**Section 14 (Accessibility Testing)**: Expanded from 4 to 8 test categories
+- Added TEST-OV-A11Y-005: Heading Hierarchy (logical H1→H2→H3 no skipping)
+- Added TEST-OV-A11Y-006: Form Accessibility (labels, aria-describedby, required field indicators)
+- Added TEST-OV-A11Y-007: Touch Targets (>= 44x44px on mobile per web-testing checklist)
+- Added TEST-OV-A11Y-008: Image Accessibility (descriptive alt text, decorative images alt="")
+
+**Section 15 (Cross-Browser Testing)**: Added TEST-OV-BROWSER-005
+- Cross-browser regression prevention (comparison matrix of 4 browsers × 8 critical flows = 32 cross-browser tests)
+
+**Section 16 (Risks & Assumptions)**: Updated Technical Debt from 5 to 8 items
+- DEBT-OV-002: Visual regression tests ✅ implemented via Playwright (aligned with web-testing skill)
+- DEBT-OV-005: Automated accessibility tests ✅ implemented via axe-core (aligned with web-testing skill)
+- DEBT-OV-006: Performance monitoring ✅ implemented via Chrome DevTools (aligned with web-testing skill)
+- DEBT-OV-007: Cross-browser testing defined per web-testing skill
+- DEBT-OV-008: Dynamic data testing defined per web-testing patterns
+
+#### Test Coverage Expansion
+
+**Estimated Test Cases**: ~229 (up from undefined/baseline)
+
+Breakdown:
+- Visual regression: 39 baseline screenshots (13 screens × 3 viewports)
+- User flow tests: 8 critical paths with Page Objects
+- Accessibility tests: 13 screens with axe-core + 7 additional a11y categories
+- Responsive tests: 91 responsive checks (13 screens × 7 viewports: 375, 414, 768, 1024, 1280, 1440, 1920)
+- Dynamic data tests: 40 data validation tests (5 scenarios × 8 screens)
+- Cross-browser tests: 24 cross-browser checks (3 browsers × 8 critical flows)
+- Performance tests: Core Web Vitals for all 13 screens (6 test categories)
+
+#### Related Specifications Updated
+
+Added "Web Testing Skill References" subsection with detailed links:
+- Main web-testing skill directory ([../../.copilot/skills/web-testing/](../../.copilot/skills/web-testing/))
+- test-patterns.md (POM, fixtures, auth reuse patterns)
+- playwright-selectors.md (selector priority guide)
+- test-scaffold.ps1 (test file generator script)
+- e2e-recipe-app-tests.md (Kitchen Odyssey test suite example)
+- Key patterns summary (9 pattern categories)
+
+#### Metadata Updates
+
+- **Version**: 1.2 → 1.3
+- **Tags**: Added 'web-testing'
+- **Last Updated**: 2026-02-11
+- **Total Lines**: 1582 (was 1100, added +482 lines)
+- **Section renumbering**: Sections 11+ renumbered to Sections 12+ (Related Specifications is now Section 12)
+
+#### Changelog Entry Added
+
+Added comprehensive changelog at end of Introduction summarizing:
+- 6 new sections added
+- ~470 lines of web-testing alignment content
+- Expanded test coverage from undefined to ~229 test cases
+- Enhanced existing sections with specific viewports, a11y categories, performance metrics
+- Documented all 8 technical debt items with web-testing alignment status
+
+### Cross-Reference Updates Added (Original v1.2)
+- Added detailed implementation order analysis reference
+- Referenced guest mode integration tasks throughout plan
+- Confirmed random recipe suggestion integration points
+- Added comprehensive compatibility notes
+
+### Prerequisite Requirements Confirmed
+- ✅ PREREQ-OV-001: Guest Mode MUST be completed first
+- ✅ PREREQ-OV-002: Random Recipe MUST be completed second
+- ✅ Implementation sequencing prevents all conflicts
+
+### Integration Verification
+- ✅ No new components created (reuses existing)
+- ✅ No breaking changes to existing functionality
+- ✅ Event-driven updates preserved (favoriteToggled, recipeUpdated)
+- ✅ Storage.js API surface unchanged
+
+## Design Specifications
+
+### Color System
+- **Primary Navigation**: #C8102E (Kitchen Odyssey brand)
+- **Modern Accent**: #137fec (Stitch blue/teal)
+- **Text & Background**: Warm gray/cool-gray scales
+- **Status Indicators**: Green (active), yellow (pending), red (suspended)
+
+### Typography
+- **Font Family**: Work Sans (Google Fonts)
+- **Hierarchy**: H1 (700, 32-40px), H2 (600, 20-24px), H3 (500-600, 16-18px), Body (400, 14-16px)
+
+### Spacing & Layout
+- **Border Radius**: 8px for all components (ROUND_EIGHT)
+- **Responsive Grid**: Mobile (1 col), Tablet (2-3 cols), Desktop (4+ cols)
+- **Spacing Scale**: Tailwind values (4=16px, 6=24px, 8=32px, 12=48px, 16=64px)
+
+## Files Modified (for reference)
+
+**All 13 Screen Files:**
+- Authentication: Login.jsx, Signup.jsx, AuthLayout.jsx
 - Recipe: Home.jsx, Search.jsx, RecipeDetail.jsx, CreateRecipe.jsx, Profile.jsx
 - Admin: AdminStats.jsx, AdminRecipes.jsx, UserList.jsx
 
-**Layouts (6 files):**
-- AuthLayout.jsx, AdminLayout.jsx, RootLayout.jsx
-- Navbar.jsx, Sidebar.jsx
+**Layout Components:**
+- Navbar.jsx, Sidebar.jsx, RootLayout.jsx, AuthLayout.jsx, AdminLayout.jsx
 
-**UI Components (7 files - Enhanced, Not Created):**
+**UI Components (Enhanced):**
 - Modal.jsx, Button.jsx, Card.jsx, Input.jsx, Tabs.jsx, Table.jsx, Badge.jsx
 
-## Verified Design References (Stitch Project ID: 12469199353397755583)
+## Testing Coverage
 
-All 13 screens verified available and accessed:
-1. User Authentication (Login/Signup)
-2. Cookhub Home - Recipe Feed
-3. Search and Filtering Results
-4. Recipe Detail View
-5. Create New Recipe Form
-6. User Profile with Tabs
-7. Admin Dashboard Overview
-8. Admin Recipe Management Table
-9. Admin User Management Table
-10. Search Results Empty State
-11. Pending User Restricted State
-12. Edit Profile Modal Interface
+**Most comprehensive suite included:**
+- Visual regression testing (all 13 screens × 3 viewports = 39 baseline screenshots)
+- User flow testing (8 critical paths with Page Objects)  
+- Accessibility testing (WCAG AA with axe-core)
+- Responsive testing (13 screens × 7 viewports = 91 checks)
+- Cross-browser testing (Chrome, Firefox, Edge, Safari)
+- Performance testing (Core Web Vitals with Chrome DevTools)
 
-## Key Requirements
+## Dependencies
 
-### Functional
-- Overhaul all 13 screens from Stitch designs
-- No hardcoded UI values (all data from storage.js)
-- Preserve all existing functionality and logic
-- Integrate Guest Mode (isGuest state, guest badges, restricted states)
-- Integrate Random Recipe Suggestion ("Surprise Me" button, RecipeSuggestionModal)
+**Prerequisites**: 
+- Guest Mode feature MUST be completed (provides isGuest state)
+- Random Recipe feature MUST be completed (provides RecipeSuggestionModal)
+
+**Enables**: Launch with modern, production-ready UI
+
+**Blocked by**: Guest Mode and Random Recipe features
+
+**Blocks**: None (final implementation phase)
+
+## Cross-Feature Coverage Analytics (Closed 2026-02-11)
+
+### Gap Identified and Resolved ✅
+
+**Original Gap**: Missing explicit test for guest analytics in Random Recipe Suggestion
+- **Requirement**: FREQ-RS-000-2 (guest suggestions do NOT increment daily_stats.views)
+- **Acceptance Criteria**: AC-RS-033 from random-recipe-suggestion-1.md
+- **Impact**: Minor possible analytics regression
+- **Status**: RESOLVED ✅
+
+### Resolution Actions Taken (2026-02-11)
+
+1. **Added FREQ-OV-017 to Functional Requirements** (design-overhaul-1.md):
+   ```markdown
+   - **FREQ-OV-017**: Guest usage of Random Recipe Suggestion must not increment analytics metrics (FREQ-RS-000-2, AC-RS-033)
+     - daily_stats.views must not contain guest ID entries
+     - activeUsers array must not contain guest IDs
+     - Verifies guest analytics bypass across Random Recipe feature
+   ```
+
+2. **Updated TASK-OV-122** in both Phase 14 tables:
+   ```markdown
+   | TASK-OV-122 | Write guest mode tests - Verify guest badge visibility, restricted states, and "Login to {action}" messages appear correctly. **CRITICAL**: Include test for guest Random Recipe analytics bypass (FREQ-RS-000-2, AC-RS-033) - verify daily_stats.views and activeUsers do NOT contain entries when guest uses "Surprise Me" button |           |            |
+   ```
+
+3. **Updated TEST-OV-FUNC-003** (Random Recipe Suggestion testing):
+   ```markdown
+   - Verify recipe meets quality constraints (>= 5 likes, >= 1 review)
+   - **CRITICAL**: Verify guest usage does NOT increment daily_stats.views (FREQ-RS-000-2, AC-RS-033), verify activeUsers array does NOT contain guest ID
+   ```
+
+4. **Updated Guest Mode Testing** in Automated Testing Strategy:
+   ```markdown
+   - **CRITICAL**: Verify guest usage of "Surprise Me" button does NOT increment daily_stats.views (FREQ-RS-000-2)
+     - daily_stats.views must not contain guest ID entries
+     - activeUsers array must not contain guest IDs
+   ```
+
+### Updated Implementation Status
+
+**Before**: ❌ 1 minor test gap (FREQ-RS-000-2 not tested)
+**After**: ✅ All gaps closed - explicit test requirements added
+
+**Confidence**: HIGH - Cross-feature interaction now explicitly tested
+
+**Readiness**: ✅ READY for implementation when prerequisites complete
+
+## Implementation Constraints
 
 ### Technical Constraints
-- No new components created (reuse existing 7 components)
-- Use existing Tailwind v4 color scheme (brand #C8102E)
-- Maintain existing routing (HashRouter) and navigation patterns
-- Preserve AuthContext state management (user, isGuest, canInteract)
-- Maintain storage.js API surface
+- No new components created (reuse existing)
+- Maintain existing AuthContext and storage.js API
+- Preserve all event-driven updates
 - Follow existing React patterns
 
-### Design Constraints
-- Match Stitch design patterns (card-based layouts, ample whitespace, clear typography)
-- Visual hierarchy (headings > subheadings > body text)
-- Responsive grid systems (mobile: 1-2 cols, tablet: 2-3 cols, desktop: 4-5 cols)
-- Consistent spacing (Tailwind scale: 4, 6, 8, 12, 16)
-- Interactive elements have hover states and transitions
-- Color-coded status indicators (green=active, yellow=pending, red=suspended)
-- Modal overlays with backdrop blur and fade-in animations
-- Tables with sticky headers, sortable columns, responsive overflow
-- Images with aspect ratio preservation and skeleton loaders
-- Forms with client-side validation and clear error messages
-
-### Accessibility Requirements
-- All interactive elements have proper ARIA labels
-- Focus management (focus trapping in modals)
-- Keyboard navigation works (Tab, Enter, ESC)
-- Color contrast meets WCAG AA standards (4.5:1 minimum)
-- Screen reader announcements for dynamic content changes
-- Focus visible state clearly indicated
-
-## Testing Requirements
-
-### Functional Regression Testing
-- All existing functionality works with new design (no regressions)
-- Guest mode integration tested (badge visibility, restricted states)
-- Random recipe suggestion tested (button, modal, loading states)
-- All authentication flows tested
-- All recipe management operations tested
-- Search and filter functionality tested
-- All interactions tested (like, favorite, review)
-- All admin operations tested
-- Navigation testing
-- Event system verification (favoriteToggled, recipeUpdated still fire)
-
-### Responsive Design Testing
-- Mobile (< 640px) for all 13 screens
-- Tablet (640px - 1024px) for all 13 screens
-- Desktop (> 1024px) for all 13 screens
-
-### Accessibility Testing
-- ARIA labels audit
-- Keyboard navigation testing
-- Screen reader compatibility (NVDA, JAWS, VoiceOver)
-- Color contrast verification (WCAG AA: 4.5:1)
-
-### Cross-Browser Testing
-- Google Chrome 90+
-- Mozilla Firefox 88+
-- Microsoft Edge 90+
-- Apple Safari 14+ (if available)
-
-## Version History
-
-### v1.1 (2026-02-11) - Current
-- Status changed from 'Planned' to 'Blocked'
-- Added blocked warning banner to plan document
-- Added version history section to plan document
-- Verified all 13 Stitch screens available
-- Confirmed all 7 required UI components exist in project
-
-### v1.0 (2026-02-11) - Initial
-- Initial design overhaul plan creation
-- 13 implementation phases defined
-- 113 tasks detailed across all phases
-- 23 files identified for modification
-- Testing requirements documented
-- Risks and mitigation strategies identified
+### Design Constraints  
+- Match Stitch design patterns exactly
+- Use hybrid color system (brand + accent)
+- Implement responsive breakpoints
+- Meet WCAG AA accessibility standards
 
 ## Acceptance Criteria
 
-- All 13 screens match Stitch designs exactly
-- All existing functionality preserved (no regressions)
-- Guest mode fully integrated (badges, restrictions, no analytics)
-- Random recipe suggestion integrated (button, modal, quality constraints)
-- No hardcoded values (dynamic data from storage.js)
-- Responsive design works across mobile, tablet, desktop
-- WCAG AA accessibility compliance met
-- Cross-browser compatibility verified
-- Integration testing passed (all features work together)
-- Visual consistency maintained across all screens
-- Component library enhanced without creating new components
-- Loading states provided for all async operations
-- Empty states handled gracefully
-- Error states handled with user-friendly messages
+**35 Total Requirements:**
+- Functional completeness (AC-OV-001 through AC-OV-016)
+- Integration compatibility (AC-OV-017 through AC-OV-032)
+- Testing completeness (TEST-OV-001 through TEST-OV-012)
 
-## Execution Order
+## Related Documents
 
-### Phase 1: Prerequisites (MUST COMPLETE FIRST)
-1. Execute [feature-guest-mode-1.md](./feature-guest-mode-1.md) implementation
-2. Execute [feature-random-recipe-suggestion-1.md](./feature-random-recipe-suggestion-1.md) implementation
-3. Verify both plans have status: 'Completed'
+- [IMPLEMENTATION-SEQUENCE-ANALYSIS.md](./IMPLEMENTATION-SEQUENCE-ANALYSIS.md) - Complete compatibility analysis with all three plans
+- [feature-guest-mode-1.md](./feature-guest-mode-1.md) - Prerequisite feature (Phase 1)
+- [feature-random-recipe-suggestion-1.md](./feature-random-recipe-suggestion-1.md) - Prerequisite feature (Phase 2)
 
-### Phase 2: Design Overhaul (CAN START AFTER PREREQUISITES)
-1. Review blocked status has been removed from design-overhaul-1.md
-2. Execute implementation phases 1-13 sequentially
-3. Complete all 113 tasks
-4. Pass all functional, responsive, accessibility, and cross-browser tests
-5. Update plan status to 'Completed'
+---
 
-## Risks & Mitigation
-
-**High Risk:**
-- Design overhaul may break existing event-driven updates (favoriteToggled, recipeUpdated)
-  - Mitigation: Test event system thoroughly (TASK-OV-112); ensure dispatch calls preserved
-- Guest mode and random recipe features may not be complete, blocking design overhaul
-  - Mitigation: Strict prerequisite enforcement; verify features complete before starting
-
-**Medium Risk:**
-- Component enhancements may introduce breaking changes
-  - Mitigation: Test components individually before full integration
-- Stitch designs may not perfectly align with existing component patterns
-  - Mitigation: Enhance components gradually; compromise on minor differences if necessary
-
-**Low Risk:**
-- Responsive design across 13 screens is complex and time-consuming
-  - Mitigation: Use consistent breakpoints (640px, 768px, 1024px)
-- Cross-browser differences may cause layout issues
-  - Mitigation: Use standard CSS properties; vendor prefixes if needed
-
-## Related Documentation
-
-- Project Overview: [project-overview](./project-overview.md)
-- Guest Mode Feature: [guest-mode-feature-implementation-plan](./guest-mode-feature-implementation-plan.md)
-- Random Recipe Suggestion: [random-recipe-suggestion-feature](./random-recipe-suggestion-feature.md)
-- Storage Data Model: [storage-data-model](./storage-data-model.md)
-- Auth Context: [auth-context](./auth-context.md)
-- Recipe Features: [recipe-features](./recipe-features.md)
-- UI Components and Styling: [ui-components-and-styling](./ui-components-and-styling.md)
+**Implementation Ready**: ✅ All tasks defined, cross-compatibility verified, comprehensive testing documented.
