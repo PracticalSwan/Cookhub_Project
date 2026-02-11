@@ -1,8 +1,8 @@
 # Guest Mode Feature Implementation Plan
 
 **Date Created:** February 7, 2026  
-**Status:** Implementation Plan v1.1 - Enhanced with Assessment Feedback  
-**Last Updated:** February 8, 2026
+**Status:** Implementation Plan v1.2 - Enhanced with Assessment Feedback & Cross-Feature Integration  
+**Last Updated:** February 9, 2026
 
 ## Summary
 
@@ -13,6 +13,14 @@ Created comprehensive implementation plan for dedicated Guest mode feature allow
 ## Assessment Feedback Integration (February 8, 2026)
 
 After comprehensive review by technical assessor rated 8.5/10, implementation plan was enhanced with following improvements:
+
+## Cross-Feature Integration Updates (February 9, 2026)
+
+Added cross-feature compatibility with Random Recipe feature (v1.1 of feature-random-recipe-suggestion-1.md):
+- AC-031: Guest users can use "Surprise Me" feature in read-only mode
+- AC-032: Guest usage of "Surprise Me" does NOT increment recipe view counts or analytics
+- Updated Random Recipe plan TEST-RS-ROLE-005 for Guest User role testing
+- Playwright integration coordinated across both features
 
 ### Accepted Recommendations (Fully Implemented)
 
@@ -33,7 +41,7 @@ After comprehensive review by technical assessor rated 8.5/10, implementation pl
 
 4. **Multiple Tab Synchronization**
    - Added GUEST-CON-007: "Guest state must be synchronized across multiple tabs"
-   - Added TASK-046: Implement storage event listener in AuthContext
+   - Tab synchronization integrated into TASK-002-UPDATE (enterGuestMode implementation)
    - Updated RISK-004 mitigation to include synchronization mechanism
 
 5. **Acceptance Criteria Definition**
@@ -111,15 +119,16 @@ After comprehensive review by technical assessor rated 8.5/10, implementation pl
   - Location: Section 1, Line 34
 
 **Updated Data Format Consistency:**
-- DATA-G-001: Updated guest ID format documentation
-  - Before: `guest-{randomId}`
-  - After: `__GUEST__{randomId}`
-  - Rationale: Matches implementation decision in TASK-004 and TASK-005
+- DATA-G-001: Guest ID format documented as `__GUEST__{randomId}` (plan specification)
+- Verification result: storage.js at line 629 implements `guest:${generateId()}` format
+- Discrepancy: storage.js uses `guest-` prefix, plan specifies `__GUEST__` prefix
+- Planned fix: Update storage.js getOrCreateGuestId() to use `__GUEST__` prefix
   - Location: Section 1, Line 51
+- Verified functions: `getOrCreateGuestId()` exists (line 629), `setCurrentUser()` exists (line 625)
 
-## Plan Structure (Updated v1.1)
+## Plan Structure (Updated v1.2)
 
-### Total Tasks: 46 tasks across 11 phases (added TASK-046 for tab synchronization)
+### Total Tasks: 48 tasks across 11 phases (includes TASK-046 integrated into TASK-002-UPDATE)
 ### Phase Estimates Added
 
 - **Phase 1**: Core Guest Mode State Management (2-3 hours)
