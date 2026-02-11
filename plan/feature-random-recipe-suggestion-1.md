@@ -1,11 +1,11 @@
 ---
 goal: Random Recipe Suggestion Feature - Smart recipe recommendations with quality constraints
-version: 1.0
+version: 1.1
 date_created: 2026-02-09
 last_updated: 2026-02-09
 owner: Project Team
 status: 'Planned'
-tags: ['feature', 'recipe-suggestion', 'random', 'ui-components', 'testing']
+tags: ['feature', 'recipe-suggestion', 'random', 'ui-components', 'testing', 'playwright', 'guest-mode']
 ---
 
 # Introduction
@@ -18,6 +18,8 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 ### Functional Requirements
 
+- **FREQ-RS-000**: Feature must work for guest users (no blocking, same behavior as pending/suspended users)
+- **FREQ-RS-000-1**: Guest views in Random Recipe feature must NOT increment daily_stats.views (inherited from guest mode behavior)
 - **FREQ-RS-001**: Users must be able to access random recipe suggestion from Home page
 - **FREQ-RS-002**: Suggested recipes must meet quality constraints: >= 5 likes AND >= 1 review
 - **FREQ-RS-003**: System must fall back to any published recipe if no recipes match constraints
@@ -43,6 +45,7 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 ### Data Requirements
 
+- **DATA-RS-000**: Verify `getReviews(recipeId)` function exists in storage.js before implementation (TASK-VER-001)
 - **DATA-RS-001**: Uses existing Recipe model (likedBy array, status, id)
 - **DATA-RS-002**: Uses existing Reviews model (getReviews(recipeId) returns array)
 - **DATA-RS-003**: No new localStorage keys required
@@ -69,9 +72,12 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 ### Testing Requirements
 
+- **TEST-RS-000**: Feature must include Playwright automated tests (align with guest mode plan's testing approach)
+- **TEST-RS-000-1**: Add Playwright test: GuestModeCompatibility - verify guests can use "Surprise Me" feature
+- **TEST-RS-000-2**: Add Playwright test: AnalyticsNotTrackedForGuest - verify guest recipe suggestions do not increment daily_stats.views
 - **TEST-RS-001**: Test with recipes matching constraints (>= 5 likes, >= 1 review)
 - **TEST-RS-002**: Test fallback behavior when no recipes meet constraints
-- **TEST-RS-003**: Test empty state when no recipes exist
+- **TEST-RS-003**: Test with guest users - verify guest can use "Surprise Me" feature (read-only access only)
 - **TEST-RS-004**: Test random selection produces different suggestions
 - **TEST-RS-005**: Test "Try Another" functionality multiple times
 - **TEST-RS-006**: Test "View Recipe" button navigates correctly
@@ -113,7 +119,8 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 | Task     | Description                                                   | Completed | Date       |
 | -------- | ------------------------------------------------------------- | --------- | ---------- |
 | TASK-005 | Create `src/components/recipe/RecipeSuggestionModal.jsx` - Component structure with Modal wrapper, recipe data display, and action buttons |           |            |
-| TASK-006 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Implement recipe display section with image, title, difficulty badge, likes count, reviews count |           |            |
+| TASK-006 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Implement recipe display section with image skeleton loader, title, difficulty badge, likes count, reviews count |           |            |
+| TASK-006-IMG | Add image error handling: onImageError callback to set fallback to placeholder image, prevent console errors |           |            |
 | TASK-007 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Add "View Recipe" button with navigation to RecipeDetail page using recipe ID |           |            |
 | TASK-008 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Add "Try Another" button with onTryAgain handler and loading state |           |            |
 | TASK-009 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Implement empty state with user-friendly message when recipe is null |           |            |
@@ -150,20 +157,40 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 ### Implementation Phase 5: Testing & Validation (Estimated: 2-3 hours)
 
-- GOAL-005: Comprehensive testing of all functionality and edge cases
+- GOAL-005: Comprehensive testing of all functionality and edge cases using both manual testing and Playwright automated tests
 
 | Task     | Description                                                   | Completed | Date       |
 | -------- | ------------------------------------------------------------- | --------- | ---------- |
 | TASK-026 | Test with recipes that meet constraints (has recipe with >= 5 likes and >= 1 review) - verify suggestion shows correct recipe |           |            |
 | TASK-027 | Test fallback behavior - modify test data to have no recipes matching constraints, verify any published recipe is suggested |           |            |
 | TASK-028 | Test empty state - clear all recipes, verify modal shows empty message |           |            |
-| TASK-029 | Test random selection - click "Try Another" multiple times, verify different recipes are suggested (statistical test with 10+ suggestions) |           |            |
+| TASK-028-IMG | Test image loading failure - set recipe with broken image URL, verify fallback to placeholder, no console errors |           |            |
+| TASK-029 | Test random selection - click "Try Another" 50-100 times, verify different recipes are suggested (improved statistical test) |           |            |
 | TASK-030 | Test "View Recipe" navigation - verify navigates to correct RecipeDetail page and recipe loads |           |            |
 | TASK-031 | Test modal close methods - verify ESC key, backdrop click, and X button all close modal |           |            |
 | TASK-032 | Test "Try Another" loading state - verify rapid clicks don't cause duplicate suggestions |           |            |
 | TASK-033 | Test with pending/suspended users - login as pending user, verify feature works (read-only access only) |           |            |
 | TASK-034 | Test responsive layout - resize browser window, verify modal and button remain usable |           |            |
 | TASK-035 | Test accessibility - use keyboard navigation (Tab, Enter, ESC) to verify modal is keyboard accessible |           |            |
+
+### Implementation Phase 6: Playwright Automated Testing (Estimated: 2-3 hours)
+
+- GOAL-006: Create Playwright automated tests aligned with guest mode plan's testing approach
+
+| Task     | Description                                                   | Completed | Date       |
+| -------- | ------------------------------------------------------------- | --------- | ---------- |
+| TASK-036 | Create `tests/random-recipe.spec.js` - Set up Playwright test file with fixture definitions and localStorage teardown |           |            |
+| TASK-037 | Write Playwright test: SurpriseMeButton - verify button exists on Home page, is clickable, and opens RecipeSuggestionModal |           |            |
+| TASK-038 | Write Playwright test: QualityConstraints - seed recipes with >= 5 likes and >= 1 review, verify suggested recipe meets constraints |           |            |
+| TASK-039 | Write Playwright test: FallbackBehavior - seed recipes with 0 likes, verify fallback to any published recipe |           |            |
+| TASK-040 | Write Playwright test: EmptyState - clear all recipes, verify modal shows "No recipes available" message |           |            |
+| TASK-041 | Write Playwright test: ViewRecipeNavigation - click "View Recipe", verify navigation to /recipe/{id} and modal closes |           |            |
+| TASK-042 | Write Playwright test: TryAnotherLoading - click "Try Another" rapidly, verify loading state prevents duplicates |           |            |
+| TASK-043 | Write Playwright test: ModalClose - verify ESC key, backdrop click, and X button all close modal |           |            |
+| TASK-044 | Write Playwright test: GuestModeCompatibility - enter guest mode, verify "Surprise Me" feature works for guests |           |            |
+| TASK-045 | Write Playwright test: GuestAnalyticsNotTracked - enter guest mode, use "Surprise Me", verify daily_stats.views not incremented for guest |           |            |
+| TASK-046 | Write Playwright test: ImageErrorHandling - set recipe with broken image URL, verify fallback to placeholder image, no console errors |           |            |
+| TASK-047 | Write Playwright test: RandomnessDistribution - click "Try Another" 50 times, verify distribution across recipes (no single recipe > 25%) |           |            |
 
 ## 3. Alternatives
 
@@ -211,11 +238,18 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 ### Internal Dependencies
 
 - **DEP-RS-003**: `src/lib/storage.js` - Must be updated with getRandomSuggestion (TASK-001 to TASK-004)
+- **DEP-RS-003-1**: `getReviews(recipeId)` function must exist in storage.js (verified by TASK-VER-001)
 - **DEP-RS-004**: `src/components/ui/Modal.jsx` - Must exist and work correctly (used by TASK-005)
 - **DEP-RS-005**: `src/components/ui/Button.jsx` - Must exist for "Surprise Me" and modal buttons (used in TASK-005, TASK-014)
 - **DEP-RS-006**: `src/components/ui/Badge.jsx` - Must exist for difficulty badge display (used in TASK-006)
 - **DEP-RS-007**: `src/pages/Recipe/Home.jsx` - Must be modified for integration (TASK-012 to TASK-019)
 - **DEP-RS-008**: `src/pages/Recipe/RecipeDetail.jsx` - Must exist for view recipe navigation (used in TASK-018)
+
+### Cross-Feature Dependencies
+
+- **DEP-RS-CROSS-001**: Guest Mode feature (feature-guest-mode-1.md) - If implemented first, Random Recipe must respect guest mode state (isGuest from AuthContext)
+- **DEP-RS-CROSS-002**: If Random Recipe is implemented first, guest compatibility must be added retroactively when Guest Mode is implemented
+- **DEP-RS-CROSS-003**: Playwright test infrastructure - If Guest Mode is implemented first, reuse existing Playwright config and test patterns from `playwright.config.js`
 
 ### Data Dependencies
 
@@ -252,12 +286,20 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 - **FILE-RS-003**: `src/components/recipe/RecipeSuggestionModal.jsx`
   - Component structure with Modal wrapper
-  - Recipe display section (image, title, difficulty, likes, reviews)
+  - Recipe display section (image with skeleton loader and error fallback, title, difficulty, likes, reviews)
   - "View Recipe" button with navigation
   - "Try Another" button with loading state
   - Empty state display (when recipe === null)
   - Close button (X) and backdrop handler
+  - Image error handling with onError callback to fallback placeholder
   - Tailwind v4 styling matching existing UI patterns
+
+- **FILE-RS-004**: `tests/random-recipe.spec.js`
+  - Playwright test suite for random recipe suggestion feature
+  - Tests: SurpriseMeButton, QualityConstraints, FallbackBehavior, EmptyState
+  - Tests: ViewRecipeNavigation, TryAnotherLoading, ModalClose
+  - Tests: GuestModeCompatibility, GuestAnalyticsNotTracked
+  - Tests: ImageErrorHandling, RandomnessDistribution
 
 ## 6. Acceptance Criteria
 
@@ -275,8 +317,15 @@ The Random Recipe Suggestion feature will be considered complete and ready for d
 - **AC-RS-008**: "Try Another" button shows loading state while fetching
 - **AC-RS-009**: Multiple "Try Another" clicks produce different suggestions (randomness verified)
 - **AC-RS-010**: Modal can be closed via ESC key, backdrop click, or X button
-- **AC-RS-011**: Feature works for all user types (admin, user, pending, suspended)
+- **AC-RS-011**: Feature works for all user types (admin, user, pending, suspended, guest)
 - **AC-RS-012**: Only published recipes are suggested (status === 'published')
+
+### Guest Mode Compatibility
+
+- **AC-RS-032**: Feature works for guest users (no blocking, same behavior as pending/suspended)
+- **AC-RS-033**: Guest views through "Surprise Me" do NOT increment daily_stats.views
+- **AC-RS-034**: Guest can use "View Recipe" and "Try Another" buttons without errors
+- **AC-RS-035**: If guest mode is not yet implemented, feature must not break when guest mode is added later
 
 ### Quality & Robustness
 
@@ -310,12 +359,14 @@ The Random Recipe Suggestion feature will be considered complete and ready for d
 
 The Random Recipe Suggestion feature is **DONE** when:
 
-1. All 31 acceptance criteria (AC-RS-001 through AC-RS-031) are met
-2. All 35 implementation tasks (TASK-001 through TASK-035) are marked as completed
-3. Manual testing of all 10 test scenarios (TASK-026 through TASK-035) is completed
-4. No open bugs or issues related to random suggestion functionality
-5. Code review confirms adherence to existing patterns and standards
-6. Feature is documented in README or user guide (if applicable)
+1. All 35 acceptance criteria (AC-RS-001 through AC-RS-035) are met
+2. All implementation tasks (TASK-VER-001 through TASK-047) are marked as completed
+3. Manual testing of all test scenarios (TASK-026 through TASK-035) is completed
+4. Playwright automated tests pass consistently (tests/random-recipe.spec.js, 3+ test runs)
+5. No open bugs or issues related to random suggestion functionality
+6. Code review confirms adherence to existing patterns and standards
+7. Guest mode compatibility verified (or documented for future integration)
+8. Feature is documented in README or user guide (if applicable)
 
 ## 7. Testing
 
@@ -339,11 +390,12 @@ The Random Recipe Suggestion feature is **DONE** when:
   - Verify modal shows "No recipes available" message
   - Verify no recipe card renders
 
-- **TEST-RS-FUNC-004**: Random Selection (TASK-029)
+- **TEST-RS-FUNC-004": Random Selection (TASK-029)
   - Ensure 10+ published recipes exist
-  - Click "Try Another" 20 times
-  - Record suggested recipe IDs
-  - Calculate distribution: verify no single recipe appears > 30% of time (statistical randomness)
+  - Click "Try Another" 50-100 times for statistical significance
+  - Record suggested recipe IDs and calculate distribution
+  - Verify no single recipe appears > 20% of time (5+ occurrences with 100 trials = statistically random)
+  - Chi-square test for uniform distribution across all recipes (optional advanced test)
 
 - **TEST-RS-FUNC-005**: View Recipe Navigation (TASK-030)
   - Click "Surprise Me"
@@ -403,6 +455,16 @@ The Random Recipe Suggestion feature is **DONE** when:
   - Click "Surprise Me"
   - Verify feature works (read-only access only)
   - Verify modal displays correctly
+
+- **TEST-RS-ROLE-005**: Guest User (TASK-033, DEP-RS-CROSS-001)
+  - Enter guest mode ("Continue as Guest" from Login page)
+  - Navigate to Home page
+  - Click "Surprise Me"
+  - Verify modal displays recipe suggestion
+  - Verify "View Recipe" navigates to RecipeDetail
+  - Verify "Try Another" loads a new suggestion
+  - Verify no recipe view counts are incremented (check localStorage daily_stats)
+  - Verify no guest ID appears in daily_stats.activeUsers
 
 ### Responsive Design Testing
 
@@ -544,12 +606,19 @@ The Random Recipe Suggestion feature is **DONE** when:
    - Execute all test suites in order:
      - Functional testing first (TASK-026 to TASK-030)
      - Modal interaction testing (TASK-031, TASK-032)
-     - User role testing (TASK-033)
+     - User role testing (TASK-033) — includes Guest User (TEST-RS-ROLE-005)
      - Responsive design testing (TASK-034)
      - Visual & styling testing (TASK-020 to TASK-025)
      - Accessibility testing (TASK-035)
      - Edge case testing (TEST-RS-EDGE-001 to TEST-RS-EDGE-005)
      - State management testing (TEST-RS-STATE-001 to TEST-RS-STATE-002)
+
+4. **Phase 6**: Playwright Automated Testing (TASK-036 to TASK-047)
+   - Set up Playwright configuration and test fixtures
+   - Run automated tests: modal open/close, "Try Another", navigation
+   - Run guest mode E2E tests (requires Guest Mode feature completed first)
+   - Run accessibility and responsive automated tests
+   - Verify all tests pass consistently (3+ runs)
 
 ## 8. Risks & Assumptions
 
@@ -572,8 +641,8 @@ The Random Recipe Suggestion feature is **DONE** when:
   - **Impact**: Low - Acceptable performance for current architecture
 
 - **RISK-RS-005**: User may click "View Recipe" and "Try Another" rapidly causing race conditions
-  - **Mitigation**: Implement loading state to disable buttons during operations (TASK-008, TASK-032)
-  - **Impact**: Low - Loading state prevents duplicate requests
+  - **Mitigation**: Implement request ID or cancellation token to ensure only one suggestion request at a time, plus loading state to disable buttons (TASK-008, TASK-032)
+  - **Impact**: Low - Request tracking prevents concurrent requests
 
 - **RISK-RS-006**: Empty recipe list may cause modal to display poorly without proper handling
   - **Mitigation**: Implement explicit empty state message and UI (TASK-009, TEST-RS-FUNC-003)

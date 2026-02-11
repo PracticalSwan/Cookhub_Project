@@ -1,8 +1,8 @@
 ---
 goal: Dedicated Guest Mode Feature Implementation - Read-only browsing without metrics tracking
-version: 1.1
+version: 1.2
 date_created: 2025-02-07
-last_updated: 2026-02-08
+last_updated: 2025-02-09
 owner: Project Team
 status: 'Planned'
 tags: ['feature', 'guest-mode', 'authentication', 'testing', 'playwright']
@@ -292,17 +292,18 @@ The following items were proposed during plan assessment and have been addressed
 ### Files to Modify
 
 - **FILE-001**: `src/context/AuthContext.jsx`
-  - Add `isGuest` state
-  - Add `enterGuestMode()` function with localStorage availability check
-  - Update `canInteract` logic
-  - Add storage event listener for tab synchronization
-  - Export new guest mode functions
+  - Add `isGuest` state variable (initialized to false)
+  - Add `enterGuestMode()` function with: guest ID generation, localStorage event listener for tab synchronization, error handling for localStorage unavailable
+  - Update `canInteract` to: `Boolean(user && user.status === 'active' && !isAdmin && !isGuest)`
+  - Export `isGuest` and `enterGuestMode` in context value object
+  - Handle storage events for multi-tab state synchronization
 
 - **FILE-002**: `src/lib/storage.js`
-  - Modify `recordView()` to skip stats for guests using `__GUEST__{id}` prefix pattern
-  - Modify `recordActiveUser()` to skip guests
-  - Modify `recordNewUser()` to skip guests
-  - Keep existing `getOrCreateGuestId()` method
+  - Verify `getOrCreateGuestId()` exists (TASK-001-VERIFY)
+  - Verify `setCurrentUser()` method exists or document alternative (TASK-001-VERIFY-2)
+  - Modify `recordView()` to skip adding to `daily_stats.views` when viewerId starts with `__GUEST__`
+  - Modify `recordActiveUser()` to skip processing when userId starts with `__GUEST__`
+  - Modify `recordNewUser()` to skip processing when userId starts with `__GUEST__`
   - Use `__GUEST__{id}` prefix format for guest IDs (instead of `guest:{id}`)
 
 - **FILE-003**: `src/pages/Auth/Login.jsx`
@@ -391,12 +392,17 @@ The Guest Mode feature will be considered complete and ready for deployment when
 - **AC-029**: Guest mode works correctly with all existing UI components
 - **AC-030**: Visual design matches existing UI patterns (no jarring transitions)
 
+### Cross-Feature Compatibility
+
+- **AC-031**: Guest users can use Random Recipe "Surprise Me" feature in read-only mode (view suggestions, navigate to recipe detail)
+- **AC-032**: Guest usage of "Surprise Me" does NOT increment recipe view counts or analytics
+
 #### Definition of Done
 
 The Guest Mode feature is **DONE** when:
 
-1. All 30 acceptance criteria (AC-001 through AC-030) are met
-2. All 46 implementation tasks (TASK-001 through TASK-045) are marked as completed
+1. All 32 acceptance criteria (AC-001 through AC-032) are met
+2. All 48 implementation tasks (TASK-001 through TASK-045, TASK-001-VERIFY, TASK-001-VERIFY-2, TASK-002-UPDATE) are marked as completed
 3. All Playwright automated tests pass consistently (3+ test runs)
 4. Manual testing checklist completed and verified
 5. No open bugs or issues related to guest mode functionality
