@@ -1,11 +1,11 @@
 ---
 goal: Complete Design Overhaul - Modernize UI based on Google Stitch designs while preserving all functionality
-version: 1.3
+version: 1.5
 date_created: 2026-02-11
-last_updated: 2026-02-11
+last_updated: 2026-02-14
 owner: Project Team
 status: 'On Hold'
-tags: ['design', 'ui-overhaul', 'stitch', 'components', 'responsive', 'accessibility', 'automated-testing', 'web-testing']
+tags: ['design', 'ui-overhaul', 'stitch', 'components', 'responsive', 'accessibility', 'automated-testing', 'web-testing', 'performance', 'react-patterns', 'color-theory']
 ---
 
 # Introduction
@@ -14,7 +14,7 @@ tags: ['design', 'ui-overhaul', 'stitch', 'components', 'responsive', 'accessibi
 
 This implementation plan provides a complete design overhaul for the Kitchen Odyssey Recipe Sharing System, transforming the current UI to match modern Google Stitch designs while preserving all existing functionality, logic, and features. The overhaul updates all major screens (13 total) with improved visual hierarchy, modern component patterns, responsive layouts, and enhanced accessibility, ensuring seamless integration with Guest Mode and Random Recipe Suggestion features.
 
-**Testing Methodology Update (v1.3):** All testing sections in this plan are now aligned with the [web-testing skill](../../.copilot/skills/web-testing/) guidelines. Testing implementation follows established patterns for:
+**Testing Methodology Update (v1.3):** All testing sections in this plan are now aligned with Playwright best practices for a Vite + React app. Testing implementation follows established patterns for:
 - Page Object Model (POM) architecture with reusable page classes
 - Fixtures for authentication state reuse (admin, user, guest)
 - Global setup for saving auth states to storage files
@@ -28,8 +28,36 @@ This implementation plan provides a complete design overhaul for the Kitchen Ody
 
 ## Changelog
 
+### Version 1.5 (2026-02-14)
+- Clarified guest analytics requirement to exclude guest views from per-recipe view counts (`viewedBy` / `getViewCount`) in addition to `daily_stats.views`.
+- Updated cross-feature references to `FREQ-RS-000-1`, `FREQ-RS-000-2`, and `AC-RS-033`.
+- Updated guest-mode test task descriptions (`TASK-OV-122`) to verify per-recipe view counts, `daily_stats.views`, and `activeUsers` all exclude guest entries.
+- Updated metadata and consistency wording for plan-only references.
+
+### Version 1.4 (2026-02-12)
+- **Major Update**: Enhanced plan with frontend-design, react-development, and Playwright testing patterns
+- **Frontend Design**:
+  - Added 60-30-10 color rule application to DESIG-OV-002 with detailed breakdown
+  - Added design tokens CSS variables specification with complete color, spacing, radius, and transition tokens
+  - Added comprehensive accessibility verification checklist (9 items: contrast, ARIA, keyboard, focus, screen reader, touch targets, heading hierarchy, forms, images)
+- **React Development**:
+  - Added performance optimization guidelines (memoization strategy for Card, Button, Table components)
+  - Added custom hooks reuse patterns (useDebounce, useLocalStorage, useMediaQuery)
+  - Added code splitting strategy (React.lazy for RecipeCard, Modal components)
+  - Added useFormValidation hook pattern with full implementation example and usage
+  - Added useDebounce hook pattern with implementation example
+  - Added component composition examples for Button and Card components
+- **Testing Execution**:
+  - Added test execution order matrix (17 steps across Week 1 & Week 2)
+  - Aligned test tasks with implementation phases (Phase 1-7 milestones)
+  - Added test maintenance guidelines with visual regression baseline update process
+  - Added flaky test resolution strategies (timing, state conflicts, race conditions, viewport issues)
+  - Added test failure analysis recommendations (debug tools, flaky test tagging, documentation)
+- Enhanced tags: ['design', 'ui-overhaul', 'stitch', 'components', 'responsive', 'accessibility', 'automated-testing', 'web-testing', 'performance', 'react-patterns', 'color-theory']
+- Total estimated test cases increased to ~229 covering all skill patterns
+
 ### Version 1.3 (2026-02-11)
-- **Major Update**: Complete testing alignment with web-testing skill guidelines
+- **Major Update**: Complete testing alignment with Playwright testing guidelines
 - Added 'web-testing' to tags
 - Changed version from 1.2 to 1.3
 
@@ -40,13 +68,14 @@ Detailed changes documented in Testing Methodology update above.
 ### Functional Requirements
 
 - **FREQ-OV-001**: All 13 screens from Stitch project must be implemented in new design
-- **FREQ-OV-002**: STRICTLY no hardcoded/fixed/non-connected logical components or values — ALL data must come from:
+- **FREQ-OV-002**: No hardcoded data values in the UI (counts, names, images, metrics) - all data must come from:
   - `src/lib/storage.js` for recipe data, user data, metrics, search history, activity logs
   - `src/context/AuthContext.jsx` for user authentication state (user, isGuest, canInteract)
-  - Dynamic component props (no hardcoded counts, names, images, or metadata)
+  - Dynamic component props for data-bound values
   - Conditional rendering based on real data states (no mocked UI for any screen)
+  - Static labels are allowed when not derived from data
   - Test with varied data sets (empty, 1 item, 100 items) during implementation
-  - VIOLATION: Any hardcoded recipe names, user counts, fixed data in JSX will fail tests
+  - VIOLATION: Any hardcoded recipe names, user counts, or fixed data in JSX will fail tests
 - **FREQ-OV-003**: All existing functionality must be preserved and connected to new design
 - **FREQ-OV-004**: Guest mode functionality must be fully integrated (isGuest state, guest badges, restricted states)
 - **FREQ-OV-005**: Random recipe suggestion must be integrated ("Surprise Me" button, RecipeSuggestionModal)
@@ -61,20 +90,21 @@ Detailed changes documented in Testing Methodology update above.
 - **FREQ-OV-014**: Empty states must be handled gracefully with Stitch-inspired designs
 - **FREQ-OV-015**: Loading states must provide visual feedback
 - **FREQ-OV-016**: Error states must be handled with user-friendly messages
-- **FREQ-OV-017**: Guest usage of Random Recipe Suggestion must not increment analytics metrics (FREQ-RS-000-2, AC-RS-033)
-  - daily_stats.views must not contain guest ID entries
-  - activeUsers array must not contain guest IDs
-  - Verifies guest analytics bypass across Random Recipe feature
+- **FREQ-OV-017**: Guest usage of Random Recipe Suggestion must not increment any view metrics (FREQ-RS-000-1, FREQ-RS-000-2, AC-RS-033)
+  - per-recipe view counts (`viewedBy` / `getViewCount`) must not include guest views
+  - `daily_stats.views` must not contain guest ID entries
+  - `activeUsers` array must not contain guest IDs
+  - Verifies complete guest analytics bypass across Random Recipe feature
 
 ### Technical Constraints
 
-- **CON-OV-001**: No new components created—reuse existing: Modal, Button, Card, Input, Badge, Tabs, Table
+- **CON-OV-001**: No new base UI components; reuse existing primitives (Modal, Button, Card, Input, Badge, Tabs, Table). Feature-specific components are allowed only when they compose existing UI components
 - **CON-OV-002**: Use hybrid color system blending brand identity (#C8102E) with Stitch modern accent (#137fec) — see detailed DESIG-OV-002 below
 - **CON-OV-003**: Maintain existing routing (HashRouter) and navigation patterns
 - **CON-OV-004**: Preserve existing AuthContext state management (user, isGuest, canInteract)
 - **CON-OV-005**: Maintain existing storage.js API surface (all data operations)
 - **CON-OV-006**: Follow existing React patterns (hooks, callbacks, event listeners)
-- **CON-OV-007**: No hardcoded text—use dynamic labels from where possible
+- **CON-OV-007**: Avoid hardcoded copy when it should come from data; static UI labels are acceptable
 - **CON-OV-008**: Maintain existing layout components (Navbar, Sidebar, AuthLayout, AdminLayout)
 - **CON-OV-009**: Preserve all event-driven updates (favoriteToggled, recipeUpdated, etc.)
 
@@ -105,6 +135,49 @@ Detailed changes documented in Testing Methodology update above.
     - Large text on colored backgrounds: 3:1 minimum
     - Verify with contrast checker during implementation (TASK-OV-099)
   - **Implementation Note:** This hybrid approach preserves Kitchen Odyssey's established cooking theme while adopting Stitch's modern, polished aesthetic
+
+**60-30-10 Rule Application:**
+- **60% - Primary Surfaces**: Cool/neutral backgrounds (#f5f7fa, #ffffff) - page backgrounds, card surfaces
+- **30% - Secondary Elements**: Secondary colors and borders (#e5e7eb, #6b7280) - borders, secondary text, muted elements
+- **10% - Brand Accents**: #C8102E (primary) + #137fec (secondary) - CTAs, navigation, interactive highlights
+
+**Design Tokens Implementation:**
+```css
+/* src/styles/design-tokens.css */
+:root {
+  /* 60% - Primary Surfaces */
+  --color-primary-bg: #f5f7fa;
+  --color-primary-surface: #ffffff;
+  --color-primary-text: #334155;
+  
+  /* 30% - Secondary Elements */
+  --color-secondary-border: #e5e7eb;
+  --color-secondary-text: #6b7280;
+  --color-secondary-muted: #94a3b8;
+  
+  /* 10% - Brand Accents */
+  --color-brand-primary: #C8102E;
+  --color-brand-secondary: #137fec;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  
+  /* Spacing Scale */
+  --spacing-sm: 16px;   /* 4 */
+  --spacing-md: 24px;   /* 6 */
+  --spacing-lg: 32px;   /* 8 */
+  --spacing-xl: 48px;   /* 12 */
+  --spacing-2xl: 64px; /* 16 */
+  
+  /* Border Radius */
+  --radius-md: 8px;
+  
+  /* Transitions */
+  --transition-fast: 150ms;
+  --transition-base: 200ms;
+  --transition-slow: 300ms;
+}
+```
 - **DESIG-OV-002.1**: Use consistent 8px border radius for all components matching Stitch's "ROUND_EIGHT" setting:
   - All buttons (primary, secondary, tertiary): 8px border radius
   - All cards (recipe cards, user cards, form cards): 8px border radius
@@ -138,11 +211,11 @@ Detailed changes documented in Testing Methodology update above.
   - **16 (64px):** Extra large gaps (hero sections) — hero section padding, prominent visual breaks
   - Use these exact Tailwind scale values (no custom spacing values) for consistency
 - **DESIG-OV-006**: Interactive elements must have hover states and transitions (0.2-0.3s duration using Tailwind transition utilities)
-- **DESIG-OV-006**: Use color-coded status indicators (green for active, yellow for pending, red for suspended)
-- **DESIG-OV-007**: Modal overlays must have backdrop blur and fade-in animations
-- **DESIG-OV-008**: Tables must have sticky headers, sortable columns, responsive overflow
-- **DESIG-OV-009**: Images must have aspect ratio preservation and skeleton loaders
-- **DESIG-OV-010**: Forms must have client-side validation with clear error messages
+- **DESIG-OV-007**: Use color-coded status indicators (green for active, yellow for pending, red for suspended)
+- **DESIG-OV-008**: Modal overlays must have backdrop blur and fade-in animations
+- **DESIG-OV-009**: Tables must have sticky headers, sortable columns, responsive overflow
+- **DESIG-OV-010**: Images must have aspect ratio preservation and skeleton loaders
+- **DESIG-OV-011**: Forms must have client-side validation with clear error messages
 
 ### Accessibility Requirements
 
@@ -159,7 +232,7 @@ Detailed changes documented in Testing Methodology update above.
 - **TEST-OV-002**: Test all existing functionality with new design (no regressions)
 - **TEST-OV-003**: Responsive testing on mobile (375px), tablet (768px), desktop (1920px)
 - **TEST-OV-004**: Accessibility testing with keyboard navigation and screen readers
-- **TEST-OV-005**: Test guest mode integration across all screens (badge visibility, restricted states)
+- **TEST-OV-005**: Test guest mode integration across all screens (badge visibility, restricted states, and no guest view-count increments)
 - **TEST-OV-006**: Test random recipe suggestion integration (button, modal, loading states)
 - **TEST-OV-007**: Cross-browser testing (Chrome, Firefox, Edge, Safari)
 - **TEST-OV-008**: Verify no hardcoded values (test with different data sets) - Supported by automated tests (TASK-OV-121)
@@ -191,23 +264,19 @@ Detailed changes documented in Testing Methodology update above.
 
 **CRITICAL**: This design overhaul plan MUST be executed AFTER both existing feature plans are complete:
 
-- **PREREQ-OV-001**: Complete [feature-guest-mode-1.md](./feature-guest-mode-1.md) implementation
+- **PREREQ-OV-001**: ✅ Complete [feature-guest-mode-1.md](./feature-guest-mode-1.md) implementation
   - Adds isGuest state to AuthContext
   - Adds "Continue as Guest" button to Login/Signup pages
   - Implements guest mode functionality (read-only browsing, no metrics)
-  - Status: MUST be 'Completed' before starting design overhaul
+  - Status: ✅ **Implemented** (2026-02-14) — Live-tested with Playwright MCP (8/8 tests passed)
 
-- **PREREQ-OV-002**: Complete [feature-random-recipe-suggestion-1.md](./feature-random-recipe-suggestion-1.md) implementation
+- **PREREQ-OV-002**: ✅ Complete [feature-random-recipe-suggestion-1.md](./feature-random-recipe-suggestion-1.md) implementation
   - Adds "Surprise Me" button to Home page
   - Adds RecipeSuggestionModal component
   - Implements random recipe suggestion with quality constraints
-  - Status: MUST be 'Completed' before starting design overhaul
+  - Status: ✅ **Implemented** (2026-02-14) — Live-tested with Playwright MCP (3/3 tests passed)
 
-**Implementation Order Analysis**: See [IMPLEMENTATION-SEQUENCE-ANALYSIS.md](./IMPLEMENTATION-SEQUENCE-ANALYSIS.md) for detailed compatibility verification between all three plans. This analysis confirms:
-- ✅ Guest Mode and Random Recipe features are compatible
-- ✅ Both features integrate seamlessly with Design Overhaul
-- ✅ No breaking changes or conflicts between implementations
-- ✅ Sequential implementation order prevents integration issues
+**Implementation Order Analysis**: Guest Mode and Random Recipe features are compatible and must be completed before the Design Overhaul to avoid rework. This order prevents integration conflicts and ensures all new states are represented in the redesigned screens.
 
 **Rationale**: Both features add components, state, and functionality that the new design must display and respect. Implementing design overhaul first would require significant revisions to account for these features.
 
@@ -293,6 +362,148 @@ Detailed changes documented in Testing Methodology update above.
 | TASK-OV-046 | Update `src/pages/Recipe/CreateRecipe.jsx` - Add "Save as Draft" button (optional, following Stitch pattern) |           |            |
 | TASK-OV-047 | Verify `src/pages/Recipe/CreateRecipe.jsx` - Test form submission with valid and invalid data, empty fields |           |            |
 
+**useFormValidation Hook Pattern (per react-development skill):**
+```javascript
+// src/hooks/useFormValidation.js
+function useFormValidation(initialValues, validationSchema) {
+  const [values, setValues] = useState(initialValues)
+  const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
+
+  const handleChange = useCallback((name, value) => {
+    setValues(prev => ({ ...prev, [name]: value }))
+    
+    // Real-time validation on change
+    if (touched[name]) {
+      validateField(name, value)
+    }
+  }, [touched, validationSchema])
+
+  const handleBlur = useCallback((name) => {
+    setTouched(prev => ({ ...prev, [name]: true }))
+    validateField(name, values[name])
+  }, [values, validationSchema])
+
+  const validateField = useCallback((name, value) => {
+    const error = validationSchema[name]?.(value)
+    setErrors(prev => ({ ...prev, [name]: error || null }))
+  }, [validationSchema])
+
+  return { values, errors, touched, handleChange, handleBlur }
+}
+
+// Usage in CreateRecipe.jsx
+const { values, errors, touched, handleChange, handleBlur } = useFormValidation(
+  { title: '', description: '', ingredients: [] },
+  {
+    title: value => value.length === 0 ? 'Title is required' : null,
+    description: value => value.length < 10 ? 'Description must be at least 10 characters' : null,
+  }
+)
+
+// Error UI
+<Input
+  label="Title"
+  value={values.title}
+  onChange={value => handleChange('title', value)}
+  onBlur={() => handleBlur('title')}
+  error={touched.title && errors.title}
+  helperText="Enter a descriptive title for your recipe"
+/>
+```
+
+**useDebounce Hook Pattern:**
+```javascript
+// src/hooks/useDebounce.js
+function useDebounce(value, delay = 500) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
+// Usage in Search.jsx
+const [searchQuery, setSearchQuery] = useState('')
+const debouncedSearchQuery = useDebounce(searchQuery, 500)
+
+useEffect(() => {
+  // API call only happens 500ms after user stops typing
+  if (debouncedSearchQuery) {
+    searchRecipes(debouncedSearchQuery)
+  }
+}, [debouncedSearchQuery])
+```
+
+**Component Composition Patterns (per react-development skill):**
+
+**Button Component Composition:**
+```javascript
+// src/components/ui/Button.jsx
+export function Button({ variant, size, children, ...props }) {
+  return (
+    <button
+      className={cn(
+        'inline-flex items-center justify-center',
+        variantClasses[variant],
+        sizeClasses[size]
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}
+
+// Usage with icon composition
+<Button variant="primary">
+  <Icon name="CheckCircle" />
+  <span>Save Recipe</span>
+</Button>
+
+// Icon-only variant
+<Button variant="icon" aria-label="Like">
+  <Icon name="Heart" />
+</Button>
+```
+
+**Card Component Composition:**
+```javascript
+// src/components/ui/Card.jsx
+export function Card({ children, image, badges, footer }) {
+  return (
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {image && (
+        <div className="relative">
+          <img src={image} alt="" className="w-full" />
+          {badges && <div className="absolute top-2 right-2">{badges}</div>}
+        </div>
+      )}
+      <div className="p-4">{children}</div>
+      {footer && <div className="border-t p-4">{footer}</div>}
+    </div>
+  )
+}
+
+// Usage in RecipeCard
+<Card
+  image={recipe.image}
+  badges={<Badge variant="sm">{recipe.difficulty}</Badge>}
+  footer={<RecipeActions recipe={recipe} />}
+>
+  <h3>{recipe.title}</h3>
+  <p>{recipe.description}</p>
+</Card>
+```
+
 ### Implementation Phase 6: User Profile Overhaul (Estimated: 3-4 hours)
 
 - GOAL-006: Overhaul Profile page with tabbed layout, profile header, and edit modal
@@ -342,6 +553,23 @@ Detailed changes documented in Testing Methodology update above.
 ### Implementation Phase 9: Component Library Enhancements (Estimated: 4-5 hours)
 
 - GOAL-009: Enhance existing UI components to support new design requirements without creating new components
+
+### Performance Optimization Guidelines (per react-development skill)
+
+**Memoization Strategy:**
+- **TASK-OV-073 (Card)**: Wrap RecipeCard in React.memo when receiving large recipe arrays
+- **TASK-OV-075 (Button)**: Memoize onClick handlers with useCallback in parent components
+- **TASK-OV-078 (Table)**: Implement virtualization for tables with >50 rows (consider react-window or react-virtualized)
+
+**Custom Hooks Reuse:**
+- Create `useDebounce` hook for search input (500ms delay)
+- Create `useLocalStorage` hook for localStorage operations (memoized)
+- Create `useMediaQuery` hook for responsive breakpoints
+
+**Code Splitting:**
+- Lazy load RecipeCard with React.lazy() for initial page load optimization
+- Lazy load Modal components with dynamic import
+- Reduce initial JS bundle size through Vite code splitting
 
 **Component Priority Order:**
 Execute component enhancements in the following order to maximize efficiency and minimize blocking:
@@ -411,6 +639,17 @@ Execute component enhancements in the following order to maximize efficiency and
 | TASK-OV-097 | Test keyboard navigation through entire application - ensure Tab, Enter, ESC work everywhere |           |            |
 | TASK-OV-098 | Test with screen reader (NVDA, JAWS, or VoiceOver) - verify content is announced clearly |           |            |
 | TASK-OV-099 | Verify color contrast ratios using contrast checker (aim for WCAG AA: 4.5:1 text, 3:1 large text) |           |            |
+
+**Accessibility Verification Checklist (per frontend-design skill):**
+- [ ] **Color Contrast** (TASK-OV-099): Verify 4.5:1 ratio for body text, 3:1 for large text (≥18px or ≥14px bold)
+- [ ] **ARIA Labels** (TASK-OV-096): All interactive elements have aria-label or text content
+- [ ] **Keyboard Navigation** (TASK-OV-097): Logical Tab order, Enter/Space activation, ESC for modals
+- [ ] **Focus Management** (TASK-OV-097): Visible focus states (2px+ ring), focus trapping in modals
+- [ ] **Screen Reader** (TASK-OV-098): Content announced clearly, dynamic content uses aria-live
+- [ ] **Touch Targets** (TASK-OV-095): Minimum 44x44px on mobile, 8px gap between targets
+- [ ] **Heading Hierarchy** (TASK-OV-096): Sequential H1→H2→H3, no skipping
+- [ ] **Form Accessibility** (TASK-OV-096): Labels associated via for/id, errors via aria-describedby
+- [ ] **Image Accessibility** (TASK-OV-096): Alt text for all images, decorative images have alt=""
 | TASK-OV-100 | Test in Google Chrome - verify all screens render correctly, no console errors |           |            |
 | TASK-OV-101 | Test in Mozilla Firefox - verify layout, localStorage, event handlers work |           |            |
 | TASK-OV-102 | Test in Microsoft Edge - verify Chromium compatibility, no rendering issues |           |            |
@@ -447,7 +686,7 @@ Execute component enhancements in the following order to maximize efficiency and
 | TASK-OV-119 | Write responsive tests - Create tests for mobile (375px), tablet (768px), desktop (1920px) viewports for all screens |           |            |
 | TASK-OV-120 | Write accessibility tests - Use Playwright's built-in a11y assertions (axe-core) to verify WCAG AA compliance on all screens |           |            |
 | TASK-OV-121 | Write dynamic data tests - Create tests that verify UI works with empty state, single item, bulk data (100 items) to catch hardcoded values |           |            |
-| TASK-OV-122 | Write guest mode tests - Verify guest badge visibility, restricted states, and "Login to {action}" messages appear correctly. **CRITICAL**: Include test for guest Random Recipe analytics bypass (FREQ-RS-000-2, AC-RS-033) - verify daily_stats.views and activeUsers do NOT contain entries when guest uses "Surprise Me" button |           |            |
+| TASK-OV-122 | Write guest mode tests - Verify guest badge visibility, restricted states, and "Login to {action}" messages appear correctly. **CRITICAL**: Include test for guest Random Recipe analytics bypass (FREQ-RS-000-1, FREQ-RS-000-2, AC-RS-033) - verify per-recipe view counts, `daily_stats.views`, and `activeUsers` do NOT contain guest entries when guest uses "Surprise Me" button |           |            |
 | TASK-OV-123 | Write event system tests - Verify favoriteToggled and recipeUpdated events fire correctly and listening components update |           |            |
 | TASK-OV-124 | Configure Chrome DevTools integration - Setup Playwright to launch Chrome with DevTools protocol for performance and debugging |           |            |
 | TASK-OV-125 | Set up performance benchmarks - Use Chrome DevTools Performance API to capture Core Web Vitals (LCP, CLS, FID, TTI) baselines |           |            |
@@ -455,20 +694,61 @@ Execute component enhancements in the following order to maximize efficiency and
 | TASK-OV-127 | Document test coverage - Create README in test directory explaining test structure, how to run, how to add new tests |           |            |
 | TASK-OV-128 | Run initial test suite - Execute all tests, capture baseline screenshots and metrics, fix any immediate failures |           |            |
 
-**Automated Testing Strategy (Based on Web-Testing Skill Guidelines):**
+**TEST EXECUTION ORDER (Recommended):**
 
-#### Test Organization (Following test-patterns.md)
-- **Page Object Model**: All 8 Page Objects in `tests/pages/*.ts` - encapsulate selectors and interactions
-- **Fixtures**: Custom fixtures in `tests/fixtures.ts` for auth reuse, test data, cleanup
-- **Global Setup**: `tests/global-setup.ts` saves auth states (admin, user, guest) to avoid repeated login
-- **Test Files**: Organized by feature (`tests/login.spec.ts`, `tests/recipe-create.spec.ts`, etc.)
+**Week 1: Infrastructure & Critical Paths**
+1. TASK-OV-114 to TASK-OV-116: Install Playwright, configuration, utilities, Page Objects (8)
+2. TASK-OV-118: Write user flow tests for 8 critical paths (authentication, recipe creation, admin)
+3. TASK-OV-118-A: Run user flow tests after Phase 1 (Auth pages) complete
+4. TASK-OV-118-B: Run user flow tests after Phase 2 (Home page) complete
+5. TASK-OV-118-C: Run user flow tests after Phase 3 (Search) complete
+6. TASK-OV-118-D: Run user flow tests after Phase 4 (Recipe Detail) complete
+7. TASK-OV-118-E: Run user flow tests after Phase 5 (Create Recipe) complete
+8. TASK-OV-118-F: Run user flow tests after Phase 6 (Profile) complete
+9. TASK-OV-118-G: Run user flow tests after Phase 7 (Admin) complete
+
+**Week 2: Non-Regression Testing**
+10. TASK-OV-117: Visual regression tests (can be written incrementally as pages ready)
+11. TASK-OV-119: Responsive tests (can be written incrementally as pages ready)
+12. TASK-OV-120: Accessibility tests (can be written incrementally as pages ready)
+13. TASK-OV-121: Dynamic data tests (require only functional pages, no styling needed)
+14. TASK-OV-122: Guest mode tests (after Phase 1 Auth + guest mode integration)
+15. TASK-OV-123: Event system tests (after all user flows implemented)
+16. TASK-OV-124 to TASK-OV-125: Chrome DevTools integration & performance benchmarks
+17. TASK-OV-126 to TASK-OV-128: CI/CD integration, documentation, initial test suite run
+
+**Test Maintenance Guidelines:**
+
+**Visual Regression Baseline Updates:**
+- Baseline screenshots should be updated only when intentional design changes are made
+- Update process: Run tests → Identify changed screenshots → Review each diff → Update baselines if changes are intentional
+- Exclude dynamic content from screenshot comparison: dates, timestamps, user-specific IDs
+
+**Flaky Test Resolution:**
+- **Timing Issues**: Use waitForSelector() instead of fixed timeouts, increase wait times as needed
+- **State Conflicts**: Ensure test cleanup in afterEach resets localStorage and application state between tests
+- **Race Conditions**: Use waitForResponse() for API calls before asserting results
+- **Viewport Issues**: Specific viewport tests should use consistent viewport size, no dynamic resizing in same test
+- **Test Failure Analysis:**
+  - When test fails, review console errors, network logs, and trace files
+  - Use Playwright Inspector (npx playwright test --debug) for interactive debugging
+  - Tag tests with @flaky if consistently failing, investigate root cause
+  - Document known flaky tests in test directory README with investigation status
+
+**Automated Testing Strategy (Based on Playwright testing guidelines):**
+
+#### Test Organization
+- **Page Object Model**: Page Objects in `tests/pages/*.js` - encapsulate selectors and interactions
+- **Fixtures**: Custom fixtures in `tests/fixtures.js` for auth reuse, test data, cleanup
+- **Global Setup**: `tests/global-setup.js` saves auth states (admin, user, guest) to avoid repeated login
+- **Test Files**: Organized by feature (`tests/login.spec.js`, `tests/recipe-create.spec.js`, etc.)
 
 #### Comprehensive Test Coverage
 
-**Visual Regression Testing (per web-testing skill examples):**
+**Visual Regression Testing:**
 - Compare screenshots across all pages to detect layout shifts or unintended design changes
 - Use pixel difference thresholds (TASK-OV-117)
-- Capture baselines for 13 screens × 3 viewports = 39 baseline screenshots
+- Capture baselines for 13 screens x 3 viewports = 39 baseline screenshots
 - Run on every PR/TASK-OV-126 via CI/CD pipeline
 
 **User Flow Testing (Following Page Object Model pattern):**
@@ -477,19 +757,19 @@ Execute component enhancements in the following order to maximize efficiency and
   - Authentication paths: login, signup, guest mode, logout (4 tests)
   - Recipe management: create, edit, delete (2 tests)
   - Admin operations: approve user, approve recipe (2 tests)
-- Each test follows structure: beforeEach → test.steps → cleanup in afterEach
+- Each test follows structure: beforeEach -> test.steps -> cleanup in afterEach
 
-**Responsive Testing (Following Responsive Test Pattern from SKILL.md):**
+**Responsive Testing (pattern in this plan):**
 - Viewport array: Mobile (375px, 414px), Tablet (768px, 1024px), Desktop (1280px, 1440px, 1920px)
 - Test all 13 screens at each viewport (TASK-OV-119)
 - Check navigation accessibility on mobile (hamburger menu vs. desktop nav)
 - Verify no horizontal scrollbars (except tables)
-- Total checks: 13 screens × ~7 viewports = 91 responsive checks
+- Total checks: 13 screens x ~7 viewports = 91 responsive checks
 
-**Accessibility Testing (Following a11y pattern from SKILL.md):**
+**Accessibility Testing (pattern in this plan):**
 - Use axe-core via Playwright (@axe-core/playwright) (TASK-OV-120)
 - Test all 13 screens for WCAG AA violations
-- Check areas per web-testing skill checklist:
+- Check areas per this checklist:
   - All interactive elements keyboard accessible
   - Focus states visible (2px ring)
   - ARIA labels on icon-only buttons
@@ -498,7 +778,7 @@ Execute component enhancements in the following order to maximize efficiency and
   - Touch targets ≥ 44x44px on mobile
 
 **Dynamic Data Testing (Test for hardcoded values):**
-- Test 5 data scenarios per web-testing skill recommendations (TASK-OV-121):
+- Test 5 data scenarios per this plan (TASK-OV-121):
   - Empty state (no recipes, no users)
   - Single item (1 recipe, 1 user)
   - Moderate data (10 recipes, 10 users)
@@ -512,9 +792,10 @@ Execute component enhancements in the following order to maximize efficiency and
 - Test restricted states on all 8 pages (disabled buttons, "Login to {action}" messages)
 - Verify Profile redirects to login for guest users
 - Verify metrics not tracked in localStorage
-- **CRITICAL**: Verify guest usage of "Surprise Me" button does NOT increment daily_stats.views (FREQ-RS-000-2, AC-RS-033)
-  - daily_stats.views must not contain guest ID entries
-  - activeUsers array must not contain guest IDs
+- **CRITICAL**: Verify guest usage of "Surprise Me" button does NOT increment view metrics (FREQ-RS-000-1, FREQ-RS-000-2, AC-RS-033)
+  - per-recipe view counts (`viewedBy` / `getViewCount`) must not include guest IDs
+  - `daily_stats.views` must not contain guest ID entries
+  - `activeUsers` array must not contain guest IDs
 
 **Event System Testing:**
 - Verify favoriteToggled event fires on like/unlike (TASK-OV-123)
@@ -522,10 +803,10 @@ Execute component enhancements in the following order to maximize efficiency and
 - Ensure listening components (Home, Search, Profile) update state immediately
 - Test with all user types (admin, user, pending, guest)
 
-**Performance Monitoring (Following Chrome DevTools pattern from SKILL.md):**
+**Performance Monitoring (Chrome DevTools pattern in this plan):**
 - Use Chrome DevTools Performance API (TASK-OV-124)
 - Capture Core Web Vitals baselines: LCP, CLS, FID, TTI (TASK-OV-125)
-- Compare against thresholds per web-testing checklist:
+- Compare against thresholds per this checklist:
   - Page load time < 3 seconds
   - LCP < 2.5 seconds
   - CLS < 0.1
@@ -533,7 +814,7 @@ Execute component enhancements in the following order to maximize efficiency and
   - Images optimized
 
 **Cross-Browser Testing:**
-- Test on Chromium, Firefox, WebKit (per web-testing skill) (TASK-OV-100 through TASK-OV-103)
+- Test on Chromium, Firefox, WebKit (TASK-OV-100 through TASK-OV-103)
 - Verify identical behavior across browsers
 - Check event listeners work (favoriteToggled, recipeUpdated)
 - Verify flexbox/grid layouts match Chrome
@@ -554,7 +835,7 @@ Execute component enhancements in the following order to maximize efficiency and
 - Cross-browser tests: 3 browsers × 8 critical paths = 24 cross-browser checks
 - Performance tests: Core Web Vitals for all 13 screens
 
-**Total Estimated Tests:** ~229 test cases covering all web-testing skill patterns
+**Total Estimated Tests:** ~229 test cases covering all testing patterns in this plan
 
 ## 3. Alternatives
 
@@ -562,7 +843,7 @@ Execute component enhancements in the following order to maximize efficiency and
 
 - **ALT-OV-001**: Create new design system from scratch with custom components
   - **Decision**: REJECTED
-  - **Rationale**: Violates CON-OV-001 (no new components); existing components work and maintain consistency
+  - **Rationale**: Violates CON-OV-001 (no new base UI components); existing components work and maintain consistency
   - **Trade-off**: More flexibility vs. more development time and potential inconsistencies
 
 - **ALT-OV-002**: Use external component library (Material UI, Ant Design, etc.)
@@ -805,7 +1086,7 @@ Execute component enhancements in the following order to maximize efficiency and
 
 ## 6. Web Testing Methodology
 
-This section defines comprehensive testing methodology based on [web-testing skill](../../.copilot/skills/web-testing/). The testing approach for design overhaul integrates:
+This section defines comprehensive testing methodology for this plan. The testing approach for design overhaul integrates:
 
 ### Testing Pillars
 1. **Playwright Automation** - Browser-based end-to-end testing
@@ -818,19 +1099,12 @@ This section defines comprehensive testing methodology based on [web-testing ski
 ### Test Architecture Patterns
 
 #### Page Object Model (POM)
-All tests must use Page Object Model pattern per web-testing skill guidelines:
+All tests must use the Page Object Model pattern described below:
 
-```typescript
-// Example: LoginPage.ts
+```js
+// Example: LoginPage.js
 export class LoginPage {
-  readonly page: Page
-  readonly emailInput: Locator
-  readonly passwordInput: Locator
-  readonly submitButton: Locator
-  readonly errorAlert: Locator
-  readonly guestButton: Locator
-
-  constructor(page: Page) {
+  constructor(page) {
     this.page = page
     this.emailInput = page.getByLabel('Email')
     this.passwordInput = page.getByLabel('Password')
@@ -841,7 +1115,7 @@ export class LoginPage {
 
   async goto() { await this.page.goto('/login') }
 
-  async login(email: string, password: string) {
+  async login(email, password) {
     await this.emailInput.fill(email)
     await this.passwordInput.fill(password)
     await this.submitButton.click()
@@ -850,34 +1124,30 @@ export class LoginPage {
 ```
 
 **Required Page Objects:**
-- `tests/pages/AuthPage.ts` - Login/Signup pages
-- `tests/pages/HomePage.ts` - Home with hero, search, grid
-- `tests/pages/SearchPage.ts` - Search with filters, results
-- `tests/pages/RecipeDetailPage.ts` - Recipe detail with tabs (Ingredients, Instructions, Reviews)
-- `tests/pages/CreateRecipePage.ts` - Create form with dynamic lists
-- `tests/pages/ProfilePage.ts` - Profile with tabs (My Recipes, Favorites, Activity, Settings)
-- `tests/pages/AdminStatsPage.ts` - Admin dashboard overview
-- `tests/pages/AdminRecipesPage.ts` - Recipe management table
-- `tests/pages/UserListPage.ts` - User management table
+- `tests/pages/AuthPage.js` - Login/Signup pages
+- `tests/pages/HomePage.js` - Home with hero, search, grid
+- `tests/pages/SearchPage.js` - Search with filters, results
+- `tests/pages/RecipeDetailPage.js` - Recipe detail with tabs (Ingredients, Instructions, Reviews)
+- `tests/pages/CreateRecipePage.js` - Create form with dynamic lists
+- `tests/pages/ProfilePage.js` - Profile with tabs (My Recipes, Favorites, Activity, Settings)
+- `tests/pages/AdminStatsPage.js` - Admin dashboard overview
+- `tests/pages/AdminRecipesPage.js` - Recipe management table
+- `tests/pages/UserListPage.js` - User management table
 
 #### Fixtures and Authentication Reuse
 Use custom fixtures for authentication state reuse (avoids logging in for every test):
 
-```typescript
-// fixtures.ts
+```js
+// fixtures.js
 import { test as base } from '@playwright/test'
 import { AuthPage } from './pages/AuthPage'
 import { HomePage } from './pages/HomePage'
 
-type Fixtures = {
-  authPage: AuthPage
-  homePage: HomePage
-  authenticatedAsUser: { page: Page, user: any }
-  authenticatedAsAdmin: { page: Page, admin: any }
-  authenticatedAsGuest: { page: Page, guest: any }
-}
-
-export const test = base.extend<Fixtures>({
+export const test = base.extend({
+  authPage: async ({ page }, use) => {
+    const authPage = new AuthPage(page)
+    await use(authPage)
+  },
   homePage: async ({ page }, use) => {
     const homePage = new HomePage(page)
     await use(homePage)
@@ -893,11 +1163,11 @@ export { expect } from '@playwright/test'
 #### Global Setup for Auth States
 Create auth state files for each user type:
 
-```typescript
-// global-setup.ts
-import { chromium, type FullConfig } from '@playwright/test'
+```js
+// global-setup.js
+import { chromium } from '@playwright/test'
 
-async function globalSetup(config: FullConfig) {
+async function globalSetup() {
   const states = [
     { file: '.auth/admin.json', email: 'admin@test.com', password: 'admin123', path: '/admin' },
     { file: '.auth/user.json', email: 'user@test.com', password: 'user123', path: '/' },
@@ -911,7 +1181,7 @@ export default globalSetup
 #### Test Structure Best Practices
 All test files must follow this structure:
 
-```typescript
+```js
 test.describe('Recipe Management', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/recipes')
@@ -922,9 +1192,7 @@ test.describe('Recipe Management', () => {
     // Cleanup: delete test data via API
     await page.request.delete('/api/test/cleanup')
     // Check console errors
-    const errors = await page.evaluate(() => {
-      return (window as any)._consoleErrors || []
-    })
+    const errors = await page.evaluate(() => window._consoleErrors || [])
     expect(errors.length).toBe(0)
   })
 
@@ -959,17 +1227,17 @@ test.describe('Recipe Management', () => {
 | Task    | Description                                                   | Completed | Date       |
 | -------- | ------------------------------------------------------------- | --------- | ---------- |
 | TASK-OV-114 | Install and configure Playwright - Add @playwright/test package, configure test environment with browser providers (chromium, firefox, webkit) |           |            |
-| TASK-OV-115 | Create test configuration - Setup `playwright.config.ts` with test directory, baseURL, viewport configuration, trace on failure |           |            |
+| TASK-OV-115 | Create test configuration - Setup `playwright.config.js` with test directory, baseURL, viewport configuration, trace on failure |           |            |
 | TASK-OV-116 | Create reusable test utilities - Build helper functions for authentication (login, signup, guest mode), data seeding, cleanup |           |            |
-| TASK-OV-116-A | Create Page Object classes - Implement test/pages/*.ts for all 8 pages (Auth, Home, Search, RecipeDetail, CreateRecipe, Profile, AdminStats, AdminRecipes, UserList) |           |            |
-| TASK-OV-116-B | Create fixtures - Implement fixtures.ts with auth state reuse, test data generation |           |            |
-| TASK-OV-116-C | Create global setup - Implement global-setup.ts to save auth states for admin, user, guest |           |            |
+| TASK-OV-116-A | Create Page Object classes - Implement tests/pages/*.js for all 8 pages (Auth, Home, Search, RecipeDetail, CreateRecipe, Profile, AdminStats, AdminRecipes, UserList) |           |            |
+| TASK-OV-116-B | Create fixtures - Implement fixtures.js with auth state reuse, test data generation |           |            |
+| TASK-OV-116-C | Create global setup - Implement global-setup.js to save auth states for admin, user, guest |           |            |
 | TASK-OV-117 | Write visual regression tests - Create screenshot comparison tests for all 13 screens to catch layout shifts and visual changes |           |            |
 | TASK-OV-118 | Write user flow tests - Create end-to-end tests for critical paths: authentication, recipe creation, search, admin operations |           |            |
 | TASK-OV-119 | Write responsive tests - Create tests for mobile (375px), tablet (768px), desktop (1920px) viewports for all screens |           |            |
 | TASK-OV-120 | Write accessibility tests - Use Playwright's built-in a11y assertions (axe-core) to verify WCAG AA compliance on all screens |           |            |
 | TASK-OV-121 | Write dynamic data tests - Create tests that verify UI works with empty state, single item, bulk data (100 items) to catch hardcoded values |           |            |
-| TASK-OV-122 | Write guest mode tests - Verify guest badge visibility, restricted states, and "Login to {action}" messages appear correctly. **CRITICAL**: Include test for guest Random Recipe analytics bypass (FREQ-RS-000-2, AC-RS-033) - verify daily_stats.views and activeUsers do NOT contain entries when guest uses "Surprise Me" button |           |            |
+| TASK-OV-122 | Write guest mode tests - Verify guest badge visibility, restricted states, and "Login to {action}" messages appear correctly. **CRITICAL**: Include test for guest Random Recipe analytics bypass (FREQ-RS-000-1, FREQ-RS-000-2, AC-RS-033) - verify per-recipe view counts, `daily_stats.views`, and `activeUsers` do NOT contain guest entries when guest uses "Surprise Me" button |           |            |
 | TASK-OV-123 | Write event system tests - Verify favoriteToggled and recipeUpdated events fire correctly and listening components update |           |            |
 | TASK-OV-124 | Configure Chrome DevTools integration - Setup Playwright to launch Chrome with DevTools protocol for performance and debugging |           |            |
 | TASK-OV-125 | Set up performance benchmarks - Use Chrome DevTools Performance API to capture Core Web Vitals (LCP, CLS, FID, TTI) baselines |           |            |
@@ -1015,7 +1283,7 @@ test.describe('Recipe Management', () => {
   - Test "Try Another" button
   - Verify loading states appear
   - Verify navigation to recipe detail works
-  - **CRITICAL**: Verify guest usage does NOT increment daily_stats.views (FREQ-RS-000-2, AC-RS-033), verify activeUsers array does NOT contain guest ID
+  - **CRITICAL**: Verify guest usage does NOT increment per-recipe view counts, `daily_stats.views` (FREQ-RS-000-1, FREQ-RS-000-2, AC-RS-033), and verify `activeUsers` does NOT contain guest ID
 
 - **TEST-OV-FUNC-004**: Recipe Management (TASK-OV-107)
   - Create new recipe with all fields (title, image, ingredients, instructions, difficulty, time)
@@ -1070,7 +1338,7 @@ test.describe('Recipe Management', () => {
   - Add 100 recipes - verify pagination/grid scales
   - Verify no recipe names, counts, or data appears hardcoded
 
-### Responsive Design Testing (following web-testing skill responsive testing pattern)
+### Responsive Design Testing (responsive testing pattern in this plan)
 
 - **TEST-OV-RESP-001**: Mobile (< 640px) - Viewports: 375px, 414px (TASK-OV-088, TASK-OV-119)
   - Test Auth pages (Login, Signup) - verify layout fits, single column
@@ -1080,7 +1348,7 @@ test.describe('Recipe Management', () => {
   - Test Profile - verify profile header fits, tabs scrollable horizontally, content stacks
   - Test Admin pages - verify tables horizontally scrollable with overflow-x, stats cards collapse to 1 column
   - Verify hamburger menu works, navigation drawer opens/closes
-  - Verify touch targets ≥ 44x44px (per web-testing accessibility checklist)
+  - Verify touch targets ≥ 44x44px
 
 - **TEST-OV-RESP-002**: Tablet (640px - 1024px) - Viewports: 768px, 1024px (TASK-OV-089, TASK-OV-119)
   - Test all screens - verify 2-3 column grids, filter sidebar visible (not collapsed)
@@ -1096,9 +1364,9 @@ test.describe('Recipe Management', () => {
   - Verify hero images display at full width
   - Verify Admin stats cards (total users, total recipes, etc.) display in 3-4 column grid
 
-### Accessibility Testing (following web-testing skill a11y pattern)
+### Accessibility Testing (accessibility testing pattern in this plan)
 
-- **TEST-OV-A11Y-001**: ARIA Labels (TASK-OV-096, per web-testing checklist)
+- **TEST-OV-A11Y-001**: ARIA Labels (TASK-OV-096, per this checklist)
   - Inspect all buttons - verify aria-label or text content exists
   - Inspect icon-only buttons (favorite, close, etc.) - verify aria-label present
   - Inspect forms - verify inputs have aria-label or associated labels (via `for` attribute)
@@ -1107,7 +1375,7 @@ test.describe('Recipe Management', () => {
   - Inspect tabs - verify role="tablist", role="tab", role="tabpanel" attributes
   - Verify dynamic content announcements with aria-live regions (search results, error messages)
 
-- **TEST-OV-A11Y-002**: Keyboard Navigation (TASK-OV-097, per web-testing checklist)
+- **TEST-OV-A11Y-002**: Keyboard Navigation (TASK-OV-097, per this checklist)
   - Tab through page sequentially - verify logical focus order follows DOM structure
   - Open modal - verify focus moves to first interactive element (not to modal container)
   - Close modal - verify focus returns to triggering element (focus restoration)
@@ -1115,9 +1383,9 @@ test.describe('Recipe Management', () => {
   - Use ESC to close modals and dropdowns - verify works everywhere
   - Use arrow keys to navigate tab lists - verify works
   - Use arrow keys to navigate radio/checkbox groups - verify works
-  - Verify focus visible state has 2px ring/outline (per web-testing checklist)
+  - Verify focus visible state has 2px ring/outline
 
-- **TEST-OV-A11Y-003**: Screen Reader Compatibility (TASK-OV-098, per web-testing keyboard accessible pattern)
+- **TEST-OV-A11Y-003**: Screen Reader Compatibility (TASK-OV-098, per this checklist)
   - Use NVDA, JAWS, or VoiceOver on Windows/Mac
   - Navigate through app - verify content announced clearly
   - Test modal open/close - verify announced with role and name
@@ -1126,7 +1394,7 @@ test.describe('Recipe Management', () => {
   - Test error messages - verify announced with role="alert" or aria-live="assertive"
   - Verify form validation errors linked to inputs via aria-describedby
 
-- **TEST-OV-A11Y-004**: Color Contrast (TASK-OV-099, per web-testing checklist)
+- **TEST-OV-A11Y-004**: Color Contrast (TASK-OV-099, per this checklist)
   - Use web contrast checker on all screens (Chrome DevTools Accessibility Audit)
   - Verify primary text meets 4.5:1 ratio (WCAG AA standard)
   - Verify large text (≥18px or ≥14px bold) meets 3:1 ratio
@@ -1134,27 +1402,27 @@ test.describe('Recipe Management', () => {
   - Verify brand accent (#137fec) vs. white text meets contrast
   - Verify primary brand (#C8102E) vs. white text meets contrast
   - Verify interactive elements (buttons, links) maintain contrast on hover/focus states
-  - Fix any failing contrast issues per web-testing checklist
+  - Fix any failing contrast issues per this checklist
 
-- **TEST-OV-A11Y-005**: Heading Hierarchy (per web-testing a11y pattern)
+- **TEST-OV-A11Y-005**: Heading Hierarchy
   - Check heading levels follow sequential order (H1 → H2 → H3, no skipping)
   - Verify h1 appears first on each page (page title)
   - Verify h2 for section/section titles, h3 for subsections
   - Verify headings contain descriptive text (not empty or decorative)
 
-- **TEST-OV-A11Y-006**: Form Accessibility (per web-testing a11y pattern)
+- **TEST-OV-A11Y-006**: Form Accessibility
   - Verify all form inputs have associated labels (via `<label for>` or `aria-label`/`aria-labelledby`)
   - Verify error messages linked to inputs via `aria-describedby`
   - Verify required fields indicated with `aria-required="true"` or `required` attribute
   - Verify helper text linked to inputs via `aria-describedby`
   - Verify form validation provides clear feedback via role="alert" or aria-live regions
 
-- **TEST-OV-A11Y-007**: Touch Targets (per web-testing checklist)
+- **TEST-OV-A11Y-007**: Touch Targets
   - Verify all interactive elements on mobile meet minimum 44x44px
   - Verify buttons, links, cards clickable areas are large enough
-  - Verify spacing between touch targets to prevent accidental taps (8px minimum gap per web-testing checklist)
+  - Verify spacing between touch targets to prevent accidental taps (8px minimum gap per this checklist)
 
-- **TEST-OV-A11Y-008**: Image Accessibility (per web-testing a11y pattern)
+- **TEST-OV-A11Y-008**: Image Accessibility
   - Verify all recipe images have alt text (descriptive, not "image123.png")
   - Verify decorative images have alt="" or role="presentation"
   - Verify image aspect ratios preserved for screen readers (alt text describes content)
@@ -1190,11 +1458,11 @@ test.describe('Recipe Management', () => {
 
 ---
 
-## 8. Error Handling & Debugging (per web-testing skill patterns)
+## 8. Error Handling & Debugging
 
 ### Console Monitoring Strategy
 
-- **TEST-OV-ERROR-001**: Console Error Tracking (per web-testing troubleshooting pattern)
+- **TEST-OV-ERROR-001**: Console Error Tracking
   - Monitor console errors during all Playwright tests via `page.on('console')` listener
   - Categorize errors:
     - JavaScript errors (TypeError, ReferenceError, SyntaxError)
@@ -1204,7 +1472,7 @@ test.describe('Recipe Management', () => {
   - Log warnings to review (deprecations indicate future breaking changes)
   - Use Chrome DevTools Console tab for manual debugging (filter by error/warning levels)
 
-- **TEST-OV-ERROR-002**: Network Request Monitoring (per web-testing network debugging pattern)
+- **TEST-OV-ERROR-002**: Network Request Monitoring
   - Monitor all network requests via `page.on('request')` and `page.on('response')`
   - Track failed requests (status >= 400 or status === 0)
   - Verify no 404s for static assets (images, CSS, JS files)
@@ -1213,7 +1481,7 @@ test.describe('Recipe Management', () => {
   - Verify API response codes correct (200 OK for GET/POST, 201 Created, 204 No Content, etc.)
   - Use Chrome DevTools Network tab for manual debugging (filter by status code, response time)
 
-- **TEST-OV-ERROR-003**: JavaScript Exception Handling (per web-testing debugging pattern)
+- **TEST-OV-ERROR-003**: JavaScript Exception Handling
   - Capture unhandled promise rejections via `window.addEventListener('unhandledrejection')`
   - Capture global errors via `window.addEventListener('error')`
   - Verify React error boundaries catch component errors gracefully
@@ -1224,7 +1492,7 @@ test.describe('Recipe Management', () => {
     - Intentional failed promise in useEffect
   - Verify crash recovery (user can navigate away, retry action, reload page)
 
-- **TEST-OV-ERROR-004**: User-Friendly Error Messages (per web-testing error handling pattern)
+- **TEST-OV-ERROR-004**: User-Friendly Error Messages
   - Verify all error messages are human-readable (not technical stack traces)
   - Verify error messages include actionable next steps ("Try again", "Contact support", etc.)
   - Verify form validation errors appear below affected inputs (not in modal alert)
@@ -1232,7 +1500,7 @@ test.describe('Recipe Management', () => {
   - Verify guest users see helpful messages ("Login to like" vs. "Access denied")
   - Verify empty states show friendly messages ("No recipes found. Try adjusting filters" vs. blank screen)
 
-- **TEST-OV-ERROR-005**: Network Error Handling (per web-testing network debugging pattern)
+- **TEST-OV-ERROR-005**: Network Error Handling
   - Verify offline handling with Service Worker (if implemented)
   - Verify slow network handling (use Chrome DevTools Network Throttling: Slow 3G)
   - Verify failed API requests show error to user with retry option
@@ -1242,12 +1510,12 @@ test.describe('Recipe Management', () => {
 
 ---
 
-## 9. Performance Monitoring (following web-testing Chrome DevTools pattern)
+## 9. Performance Monitoring (Chrome DevTools pattern)
 
 ### Core Web Vitals Baselines
 
 - **TEST-OV-PERF-001**: Largest Contentful Paint (LCP) (TASK-OV-125)
-  - Measure LCP for all 13 screens (within 2.5 seconds threshold per web-testing checklist)
+  - Measure LCP for all 13 screens (within 2.5 seconds threshold per this checklist)
   - Identify slow LCP culprits via Chrome DevTools Performance tab LCP marker
   - Optimize LCP by:
     - Lazy loading below-fold images
@@ -1256,7 +1524,7 @@ test.describe('Recipe Management', () => {
   - Set LCP performance budget at 2.5 seconds for all pages
 
 - **TEST-OV-PERF-002**: Cumulative Layout Shift (CLS) (TASK-OV-125)
-  - Measure CLS for all 13 screens (within 0.1 threshold per web-testing checklist)
+  - Measure CLS for all 13 screens (within 0.1 threshold per this checklist)
   - Identify layout shift culprits via Chrome DevTools Performance tab Layout Shift markers
   - Fix layout shifts by:
     - Reserving image space with aspect-ratio CSS
@@ -1265,7 +1533,7 @@ test.describe('Recipe Management', () => {
   - Set CLS performance budget at 0.1 for all pages
 
 - **TEST-OV-PERF-003**: First Input Delay (FID) (TASK-OV-125)
-  - Measure FID for interactive elements (target < 100ms though web-testing checklist doesn't specify)
+- Measure FID for interactive elements (target < 100ms though this plan doesn't specify a strict threshold)
   - Identify long tasks blocking main thread via Chrome DevTools Performance tab Long Tasks
   - Optimize FID by:
     - Code splitting large JS bundles
@@ -1274,17 +1542,17 @@ test.describe('Recipe Management', () => {
   - Verify no JavaScript tasks > 50ms block user input
 
 - **TEST-OV-PERF-004**: Time to Interactive (TTI) (TASK-OV-125)
-  - Measure TTI for all 13 screens (target < 5 seconds per web-testing checklist: page load < 3 seconds)
+  - Measure TTI for all 13 screens (target < 5 seconds per this checklist: page load < 3 seconds)
   - Identify JavaScript execution blocking interactivity via Performance tab
   - Optimize TTI by:
     - Reducing initial JS bundle size (tree-shaking, code splitting)
     - Deferring non-critical JS (analytics, social widgets)
-    - Using Server Components for non-interactive UI
+    - Using React.lazy for non-critical UI and memoizing heavy components
   - Set TTI performance budget at 5 seconds for all pages
 
 - **TEST-OV-PERF-005**: Bundle Size Monitoring
   - Measure production bundle sizes for each route (goal: < 100KB JS per route)
-  - Use `vite build --report` to generate bundle analysis
+- Use a bundle analyzer (e.g., rollup-plugin-visualizer) to generate a bundle report
   - Identify largest dependencies contributing to bundle size
   - Optimize by:
     - Using dynamic imports for heavy libraries (charts, PDF generator)
@@ -1303,18 +1571,18 @@ test.describe('Recipe Management', () => {
 
 ---
 
-## 10. Testing Checklist (from web-testing skill checklist)
+## 10. Testing Checklist
 
 ### Functional Testing
 
-- [ ] All user flows work end-to-end (per web-testing checklist)
+- [ ] All user flows work end-to-end
 - [ ] Form validation tested for success and failure cases
 - [ ] Error handling verified (per ERROR-001 through ERROR-005)
 - [ ] Edge cases covered (empty state, bulk data, invalid data)
 
 ### Responsive Testing
 
-- [ ] Tested on mobile (375px, 414px) (per web-testing checklist)
+- [ ] Tested on mobile (375px, 414px)
 - [ ] Tested on tablet (768px, 1024px)
 - [ ] Tested on desktop (1280px, 1440px, 1920px)
 - [ ] Navigation accessible on mobile (hamburger menu)
@@ -1322,14 +1590,14 @@ test.describe('Recipe Management', () => {
 
 ### Cross-Browser
 
-- [ ] Tested in Chrome (per web-testing checklist)
+- [ ] Tested in Chrome
 - [ ] Tested in Firefox
 - [ ] Tested in Safari/WebKit
 - [ ] Tested in Edge
 
 ### Accessibility
 
-- [ ] All interactive elements keyboard accessible (per web-testing checklist)
+- [ ] All interactive elements keyboard accessible
 - [ ] Focus states visible
 - [ ] ARIA labels on icon-only buttons
 - [ ] Form fields have labels
@@ -1341,7 +1609,7 @@ test.describe('Recipe Management', () => {
 
 ### Performance
 
-- [ ] Page load time < 3 seconds (per web-testing checklist)
+- [ ] Page load time < 3 seconds
 - [ ] LCP < 2.5 seconds (TASK-OV-125)
 - [ ] CLS < 0.1
 - [ ] No layout shifts on interaction
@@ -1457,54 +1725,36 @@ test.describe('Recipe Management', () => {
 ### Technical Debt Considerations
 
 - **DEBT-OV-001**: Component files may become large with enhancement props/options
-  - **Remediation**: Consider component composition or hooks for complex logic when appropriate
-  - **Effort**: Medium (refactoring task during future maintenance)
+  - **Remediation**: Split into smaller components or hooks for complex logic
+  - **Effort**: Medium (refactoring during maintenance)
 
-- **DEBT-OV-002**: Automated visual regression tests implemented via Playwright (TASK-OV-117): ✅ Aligned with web-testing skill
-  - **Remediation**: Expand baseline comparisons for more complex scenarios (intermediate states, loading spinners)
-  - **Effort**: Medium - enhance existing test suite
+- **DEBT-OV-002**: Visual regression baselines will need periodic updates
+  - **Remediation**: Document baseline update procedure and use pixel-diff thresholds
+  - **Effort**: Medium
 
-- **DEBT-OV-003**: Design system may need documentation (component usage guidelines, spacing scale)
-  - **Remediation**: Create design system guide or storybook for components
-  - **Effort**: Medium - 1-2 days documentation
+- **DEBT-OV-003**: Design system lacks documentation (spacing scale, component usage)
+  - **Remediation**: Create a lightweight design system guide (or Storybook later)
+  - **Effort**: Medium
 
-- **DEBT-OV-004**: No internationalization (i18n) support in current implementation
-  - **Remediation**: Future feature to support multiple languages
-  - **Effort**: Large (all text strings to translation mechanism)
+- **DEBT-OV-004**: No internationalization (i18n) support
+  - **Remediation**: Plan translation keys and extraction for user-facing text
+  - **Effort**: Large
 
-- **DEBT-OV-005**: Automated accessibility testing implemented via axe-core (TASK-OV-120): ✅ Aligned with web-testing skill
-  - **Remediation**: Add continuous monitoring dashboard (trend analysis of a11y issues over time)
-  - **Effort**: Medium - integrate CI/CD dashboard for a11y test results
+- **DEBT-OV-005**: Automated accessibility monitoring is not continuous
+  - **Remediation**: Add CI reporting/dashboard for a11y results
+  - **Effort**: Medium
 
-- **DEBT-OV-006**: Performance monitoring implemented via Chrome DevTools (TASK-OV-125): ✅ Aligned with web-testing skill
-  - **Remediation**: Add production analytics SDK for real user monitoring (RUM) alongside lab measurements
-  - **Effort**: Medium - integrate monitoring SDK for production environments
+- **DEBT-OV-006**: Performance monitoring is lab-only (DevTools)
+  - **Remediation**: Add RUM analytics in production if needed
+  - **Effort**: Medium
 
-- **DEBT-OV-007**: Cross-browser testing defined per web-testing skill: ✅ Aligned with Chrome, Firefox, WebKit coverage
-  - **Remediation**: Add automated cross-browser testing in CI/CD (currently manual testing step suggested)
-  - **Effort**: Large - requires Sauce Labs or BrowserStack integration for CI/CD
+- **DEBT-OV-007**: Cross-browser testing is manual
+  - **Remediation**: Add automated cross-browser runs in CI (BrowserStack/Sauce Labs)
+  - **Effort**: Large
 
-- **DEBT-OV-008**: Dynamic data testing defined per web-testing skill patterns: ✅ Aligned with 5 data scenarios
-  - **Remediation**: Add data generation utilities for edge case testing (very long text, special characters, unicode)
-  - **Effort**: Small - expand existing test data utilities
-  - **Remediation**: Consider component composition or hooks for complex logic when appropriate
-  - **Effort**: Medium (refactoring task during future maintenance)
-
-- **DEBT-OV-002**: No automated visual regression testing (would catch layout shifts)
-  - **Remediation**: Add Playwright or Cypress visual regression tests in future
-  - **Effort**: Large (test infrastructure setup)
-
-- **DEBT-OV-003**: Design system may need documentation (component usage guidelines, spacing scale)
-  - **Remediation**: Create design system guide or storybook for components
-  - **Effort**: Medium - 1-2 days documentation
-
-- **DEBT-OV-004**: No internationalization (i18n) support in current implementation
-  - **Remediation**: Future feature to support multiple languages
-  - **Effort**: Large (all text strings to translation mechanism)
-
-- **DEBT-OV-005**: Accessibility testing is manual; automated a11y tests would be better
-  - **Remediation**: Integrate axe-core or similar a11y testing library
-  - **Effort**: Medium - 3-5 days integration and test coverage
+- **DEBT-OV-008**: Edge-case data coverage is limited
+  - **Remediation**: Add data generators for long text, unicode, and large lists
+  - **Effort**: Small
 
 ---
 
@@ -1512,16 +1762,18 @@ test.describe('Recipe Management', () => {
 
 ### Project Documentation
 
-- [Project Overview](../.serena/memories/project-overview.md) - Overall project architecture and goals
-- [Storage Data Model](../.serena/memories/storage-data-model.md) - localStorage structure and API
-- [Auth Context](../.serena/memories/auth-context.md) - Authentication state management (including guest mode)
-- [Recipe Features](../.serena/memories/recipe-features.md) - Recipe interaction features and data model
-- [UI Components and Styling](../.serena/memories/ui-components-and-styling.md) - Component library and design system
+- [README](../README.md) - Setup and run instructions
+- [DESIGN](../DESIGN.md) - UI and architecture notes
+- [PROPOSAL](../PROPOSAL.md) - Project scope and goals
+- [`src/lib/storage.js`](../src/lib/storage.js) - Local storage data model and APIs
+- [`src/context/AuthContext.jsx`](../src/context/AuthContext.jsx) - Auth state and role checks
+- [`src/components/ui/`](../src/components/ui/) - UI primitives used across screens
+- [`src/layouts/`](../src/layouts/) - Layout and navigation patterns
 
 ### Existing Implementation Plans
 
-- [Guest Mode Feature](./feature-guest-mode-1.md) - Guest authentication, read-only access, no metrics tracking (PREREQ-OV-001)
-- [Random Recipe Suggestion](./feature-random-recipe-suggestion-1.md) - "Surprise Me" button, quality constraints, modal (PREREQ-OV-002)
+- [Guest Mode Feature](./feature-guest-mode-1.md) - ✅ Implemented — Guest authentication, read-only access, no metrics tracking (PREREQ-OV-001)
+- [Random Recipe Suggestion](./feature-random-recipe-suggestion-1.md) - ✅ Implemented — "Surprise Me" button, quality constraints, modal (PREREQ-OV-002)
 
 ### Stitch Design Screens
 
@@ -1548,25 +1800,18 @@ test.describe('Recipe Management', () => {
 - [WCAG Accessibility Guidelines](https://www.w3.org/WAI/WCAG21/quickref/) - Color contrast, keyboard navigation, ARIA attributes
 - [Playwright Documentation](https://playwright.dev/) - Automated testing, visual regression, browser automation
 
-### Web Testing Skill References (Primary Source)
+### Testing Patterns
 
-- **[Web Testing Skill](../../.copilot/skills/web-testing/)** - Comprehensive testing guidelines used throughout this plan
-  - [Playwright Testing Patterns](../../.copilot/skills/web-testing/references/test-patterns.md) - Page Object Model, fixtures, auth reuse, API mocking
-  - [Playwright Selectors Guide](../../.copilot/skills/web-testing/references/playwright-selectors.md) - Selector priority order, decision trees
-  - [Test Scaffold Script](../../.copilot/skills/web-testing/scripts/test-scaffold.ps1) - PowerShell test file generator for e2e, visual, accessibility tests
-  - [E2E Recipe App Tests Example](../../.copilot/skills/web-testing/examples/e2e-recipe-app-tests.md) - Complete Kitchen Odyssey test suite with Page Objects and CI configuration
-- **Key Patterns from Web Testing Skill:**
-  - Page Object Model (POM) for encapsulating page interactions in reusable classes
-  - Fixtures for authentication state reuse (avoids repeated login in tests)
-  - Global Setup for saving auth states (admin, user, guest) to storage files
-  - Test Structure with beforeEach/afterEach hooks and test.step() for organization
-  - Responsive Testing with viewport arrays and mobile/tablet/desktop verification
-  - Accessibility Testing with axe-core integration for WCAG AA compliance
-  - Chrome DevTools Integration for performance profiling and console/network monitoring
-  - Troubleshooting Patterns: snapshot-first approach, console/network analysis, performance profiling
-  - Testing Checklist: functionality, responsive, cross-browser, accessibility, performance, error handling
+- Page Object Model (POM) for reusable page interactions
+- Fixtures for auth state reuse (admin, user, guest)
+- Global setup for saving auth states to storage files
+- beforeEach/afterEach + test.step() for structure
+- Viewport arrays for responsive testing
+- axe-core for a11y checks (WCAG AA)
+- DevTools/console/network inspection for troubleshooting
+- Visual regression via screenshot comparison
 
-### Web Testing Tools & Libraries
+### Testing Tools & Libraries
 
 - **Playwright** (@playwright/test) - Open-source test automation framework
 - **@axe-core/playwright** - Accessibility testing via axe-core integration (TASK-OV-120)
@@ -1598,3 +1843,7 @@ When considering post-overhaul enhancements or iterations:
 **Critical Reminder**: This design overhaul plan MUST NOT be started until BOTH feature-guest-mode-1.md and feature-random-recipe-suggestion-1.md have status: 'Completed'. Executing this plan prematurely would require significant rework to account for the components, state, and functionality those plans introduce.
 
 **IMPORTANT: NO IMPLEMENTATION YET** - This plan document is for future execution after prerequisites are met. All changes described here are for a future UI overhaul from current design to new Stitch UI. No code should be implemented now.
+
+
+
+

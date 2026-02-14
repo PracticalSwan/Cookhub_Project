@@ -792,6 +792,7 @@ export const storage = {
     },
 
     // Record view: add viewer to recipe's viewedBy if not already present
+    // Guest views are excluded from all metrics (viewedBy, daily_stats)
     recordView: (viewerIdOrOptions, recipeIdMaybe) => {
         let viewerId = null;
         let recipeId = null;
@@ -812,7 +813,12 @@ export const storage = {
         const recipe = recipes.find(r => r.id === recipeId);
         if (!recipe) return 0;
 
-        const viewerKey = viewerType === 'guest' ? `guest:${viewerId}` : viewerId;
+        // Guest views: return current count without recording anything
+        if (viewerType === 'guest' || (typeof viewerId === 'string' && viewerId.startsWith('guest-'))) {
+            return recipe.viewedBy?.length || 0;
+        }
+
+        const viewerKey = viewerId;
         if (!recipe.viewedBy) recipe.viewedBy = [];
         if (!recipe.viewedBy.includes(viewerKey)) {
             recipe.viewedBy.push(viewerKey);
@@ -905,8 +911,9 @@ export const storage = {
         return JSON.parse(localStorage.getItem(STORAGE_KEYS.DAILY_STATS) || '{}');
     },
 
-    // Record a new user registration
+    // Record a new user registration (no-op for guest IDs)
     recordNewUser: (userId, role = 'user') => {
+        if (!userId || (typeof userId === 'string' && userId.startsWith('guest-'))) return;
         const allStats = storage.getDailyStats();
         const today = getTodayKey();
 
@@ -926,8 +933,9 @@ export const storage = {
         localStorage.setItem(STORAGE_KEYS.DAILY_STATS, JSON.stringify(allStats));
     },
 
-    // Record an active user (DAU tracking)
+    // Record an active user (DAU tracking, no-op for guest IDs)
     recordActiveUser: (userId) => {
+        if (!userId || (typeof userId === 'string' && userId.startsWith('guest-'))) return;
         const allStats = storage.getDailyStats();
         const today = getTodayKey();
 
@@ -990,5 +998,22 @@ export const storage = {
             .filter(activity => activity.time)
             .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
             .slice(0, Math.max(1, limit));
+    },
+
+    // Random recipe suggestion with quality constraints
+    getRandomSuggestion: () => {
+        const recipes = storage.getRecipes().filter(r => r.status === 'published');
+        if (recipes.length === 0) return null;
+
+        // Filter by quality constraints: >= 5 likes AND >= 1 review
+        const qualityRecipes = recipes.filter(r => {
+            const likeCount = r.likedBy?.length || 0;
+            const reviewCount = storage.getReviews(r.id)?.length || 0;
+            return likeCount >= 5 && reviewCount >= 1;
+        });
+
+        const pool = qualityRecipes.length > 0 ? qualityRecipes : recipes;
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        return pool[randomIndex];
     }
 };

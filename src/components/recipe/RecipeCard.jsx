@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { cn, normalizeCategories } from '../../lib/utils';
 
 export function RecipeCard({ recipe, onFavoriteToggle, actionOverlay }) {
-    const { user, canInteract } = useAuth();
+    const { user, canInteract, isGuest } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
     const [isFavorited, setIsFavorited] = useState(false);
     const [likeCount, setLikeCount] = useState(recipe.likedBy?.length || 0);
@@ -88,7 +88,7 @@ export function RecipeCard({ recipe, onFavoriteToggle, actionOverlay }) {
                     <button
                         onClick={handleLikeClick}
                         className={`absolute top-1.5 left-1.5 p-1.5 rounded-full bg-white/80 backdrop-blur-sm shadow-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-cool-gray-90 focus-visible:ring-offset-1 ${canInteract ? 'hover:bg-white' : 'opacity-60 cursor-not-allowed'}`}
-                        title={canInteract ? (isLiked ? 'Unlike' : 'Like') : 'Pending accounts cannot like recipes'}
+                        title={canInteract ? (isLiked ? 'Unlike' : 'Like') : isGuest ? 'Login to like' : 'Pending accounts cannot like recipes'}
                         aria-label={isLiked ? 'Unlike recipe' : 'Like recipe'}
                         aria-pressed={isLiked}
                         aria-disabled={!canInteract}
@@ -129,7 +129,7 @@ export function RecipeCard({ recipe, onFavoriteToggle, actionOverlay }) {
                         <button
                             onClick={handleSaveClick}
                             className={`p-1 rounded-md transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-cool-gray-90 focus-visible:ring-offset-1 ${canInteract ? 'hover:bg-cool-gray-10' : 'opacity-60 cursor-not-allowed'}`}
-                            title={canInteract ? (isFavorited ? 'Unsave' : 'Save') : 'Pending accounts cannot save recipes'}
+                            title={canInteract ? (isFavorited ? 'Unsave' : 'Save') : isGuest ? 'Login to save' : 'Pending accounts cannot save recipes'}
                             aria-label={isFavorited ? 'Unsave recipe' : 'Save recipe'}
                             aria-pressed={isFavorited}
                             aria-disabled={!canInteract}

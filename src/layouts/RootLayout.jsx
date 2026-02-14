@@ -5,13 +5,13 @@ import { Navbar } from '../components/layout/Navbar';
 import { Loader2 } from 'lucide-react';
 
 export function RootLayout() {
-    const { user, loading, isAdmin } = useAuth();
+    const { user, loading, isAdmin, isGuest } = useAuth();
 
     if (loading) {
         return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-cool-gray-90" /></div>;
     }
 
-    if (!user) {
+    if (!user && !isGuest) {
         return <Navigate to="/login" replace />;
     }
 

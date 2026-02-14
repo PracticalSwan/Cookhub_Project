@@ -15,7 +15,7 @@ export function Signup() {
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const { signup } = useAuth();
+    const { signup, enterGuestMode } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -135,6 +135,25 @@ export function Signup() {
                     Create Account
                 </Button>
             </form>
+
+            <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-cool-gray-20" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-cool-gray-40">or</span>
+                </div>
+            </div>
+
+            <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                size="lg"
+                onClick={() => { enterGuestMode(); navigate('/'); }}
+            >
+                Continue as Guest
+            </Button>
 
             <div className="text-center text-sm text-cool-gray-60">
                 Already have an account?{' '}

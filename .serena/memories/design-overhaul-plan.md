@@ -2,8 +2,9 @@
 
 ## Status: Blocked (until prerequisites complete)
 
-**Created**: 2026-02-11  
-**Last Updated**: 2026-02-11  
+**Created**: 2026-02-11
+**Last Updated**: 2026-02-12
+**Version**: 1.4 (enhanced with skill patterns)
 **Implementation Sequence**: Phase 3 of 3 (final phase, requires both features complete)
 
 ## Summary
@@ -30,7 +31,85 @@ This memory contains the complete design overhaul implementation plan as documen
 
 ## Updates (February 11, 2026)
 
-### Version 1.3 - Web Testing Skill Alignment (v1.3)
+### Version 1.4 - Enhanced Skill Pattern Integration (2026-02-12)
+
+**Major Addition**: Comprehensive skill pattern integration from frontend-design, react-development, and web-testing skills.
+
+#### New Content Added (~250 lines total)
+
+**Frontend Design Enhancements (added to DESIG-OV-002):**
+- 60-30-10 Color Rule Application with detailed breakdown:
+  - 60%: Primary Surfaces (#f5f7fa, #ffffff)
+  - 30%: Secondary Elements (#e5e7eb, #6b7280)
+  - 10%: Brand Accents (#C8102E, #137fec)
+- Design Tokens CSS Variables Specification:
+  - Color tokens (primary, secondary, brand, status)
+  - Spacing tokens (16px-64px exact Tailwind values)
+  - Radius tokens (8px consistency)
+  - Transition tokens (150ms-300ms)
+- Complete implementation example for `src/styles/design-tokens.css`
+
+**React Development Enhancements (added to Phase 9):**
+- Performance Optimization Guidelines:
+  - Memoization strategy: React.memo for Card, useCallback for Button handlers, virtualization for Table >50 rows
+  - Custom hooks reuse: useDebounce (500ms), useLocalStorage, useMediaQuery
+  - Code splitting: React.lazy for RecipeCard, Modal, reduce JS bundle size
+- Component Priority Order: P0 (Modal, Input, Button), P1 (Card, Table), P2 (Tabs), P3 (Badge)
+
+**Component Patterns & Hooks (added after TASK-OV-047):**
+- useFormValidation Hook Pattern:
+  - Full implementation in src/hooks/useFormValidation.js
+  - handleChange with real-time validation on blur
+  - handleBlur to mark fields as touched
+  - validateField with validation schema
+  - Usage example in CreateRecipe.jsx with error UI
+- useDebounce Hook Pattern:
+  - Full implementation with useEffect cleanup
+  - Delay default 500ms
+  - Usage example in Search.jsx for search queries
+- Component Composition Examples:
+  - Button component with icon composition and icon-only variant
+  - Card component with image overlay, badges, footer composition
+  - Usage examples showing clean props-based API
+
+**Testing Execution Enhancements (added after TASK-OV-128):**
+- Test Execution Order Matrix (17 detailed steps):
+  - Week 1: Infrastructure & Critical Paths (9 steps)
+    - Install Playwright, config, Page Objects
+    - Write user flow tests for 8 critical paths
+    - Phased execution aligned with implementation (Phase 1-7 milestones)
+  - Week 2: Non-Regression Testing (8 steps)
+    - Visual regression (incremental as pages ready)
+    - Responsive tests (incremental as pages ready)
+    - Accessibility tests (incremental as pages ready)
+    - Dynamic data, guest mode, event system tests
+    - Chrome DevTools integration & performance benchmarks
+    - CI/CD integration, documentation, initial run
+- Test Maintenance Guidelines:
+  - Visual Regression Baseline Updates:
+    - Update only on intentional design changes
+    - Review diff process before updating
+    - Exclude dynamic content (dates, timestamps, user IDs)
+  - Flaky Test Resolution Strategies:
+    - Timing Issues: waitForSelector vs fixed timeouts
+    - State Conflicts: localStorage cleanup in afterEach
+    - Race Conditions: waitForResponse before assertions
+    - Viewport Issues: consistent sizes per test
+    - Test Failure Analysis: console/network/trace review, Playwright Inspector, flaky tagging, documentation
+
+**Accessibility Enhancements (added after TASK-OV-099):**
+- Accessibility Verification Checklist (9 items frontend-design skill):
+  - Color Contrast (4.5:1 body, 3:1 large text ≥18px)
+  - ARIA Labels (all interactive elements)
+  - Keyboard Navigation (logical Tab, Enter/Space, ESC)
+  - Focus Management (2px+ ring, modal focus trapping)
+  - Screen Reader (aria-live regions)
+  - Touch Targets (≥44x44px on mobile, 8px gap)
+  - Heading Hierarchy (H1→H2→H3 sequential)
+  - Form Accessibility (for/id labels, aria-describedby errors)
+  - Image Accessibility (alt text, decorative alt="")
+
+### Version 1.3 - Web Testing Skill Alignment (2026-02-11)
 
 **Major Addition**: Complete testing sections aligned with [web-testing skill](../../.copilot/skills/web-testing/) guidelines.
 
@@ -157,10 +236,15 @@ Added comprehensive changelog at end of Introduction summarizing:
 ## Design Specifications
 
 ### Color System
+- **60-30-10 Rule Application**:
+  - **60% - Primary Surfaces**: Cool/neutral backgrounds (#f5f7fa, #ffffff) - page backgrounds, card surfaces
+  - **30% - Secondary Elements**: Secondary colors and borders (#e5e7eb, #6b7280) - borders, secondary text, muted elements
+  - **10% - Brand Accents**: #C8102E (primary) + #137fec (secondary) - CTAs, navigation, interactive highlights
 - **Primary Navigation**: #C8102E (Kitchen Odyssey brand)
 - **Modern Accent**: #137fec (Stitch blue/teal)
 - **Text & Background**: Warm gray/cool-gray scales
 - **Status Indicators**: Green (active), yellow (pending), red (suspended)
+- **Design Tokens**: Complete CSS variables in `src/styles/design-tokens.css` with colors, spacing (4-16), radius (8px), transitions (150-300ms)
 
 ### Typography
 - **Font Family**: Work Sans (Google Fonts)
@@ -170,6 +254,12 @@ Added comprehensive changelog at end of Introduction summarizing:
 - **Border Radius**: 8px for all components (ROUND_EIGHT)
 - **Responsive Grid**: Mobile (1 col), Tablet (2-3 cols), Desktop (4+ cols)
 - **Spacing Scale**: Tailwind values (4=16px, 6=24px, 8=32px, 12=48px, 16=64px)
+
+### Performance Patterns
+- **Memoization**: React.memo for large lists, useCallback for handlers
+- **Custom Hooks**: useDebounce (500ms), useLocalStorage, useMediaQuery
+- **Code Splitting**: React.lazy for heavy components (RecipeCard, Modal)
+- **Bundle Size Target**: <100KB JS per route
 
 ## Files Modified (for reference)
 
@@ -236,3 +326,7 @@ Added comprehensive changelog at end of Introduction summarizing:
 ---
 
 **Implementation Ready**: ✅ All tasks defined, cross-compatibility verified, comprehensive testing documented.
+## Memory Update (2026-02-14)
+
+- Cross-feature requirement updated: guest usage of Random Recipe must not increment per-recipe view counts, daily_stats.views, or activeUsers.
+- TASK-OV-122 validation now requires checking all three metrics above.

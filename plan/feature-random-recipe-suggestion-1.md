@@ -1,16 +1,16 @@
 ---
 goal: Random Recipe Suggestion Feature - Smart recipe recommendations with quality constraints
-version: 1.1
+version: 1.2
 date_created: 2026-02-09
-last_updated: 2026-02-09
+last_updated: 2026-02-14
 owner: Project Team
-status: 'Planned'
+status: 'Implemented'
 tags: ['feature', 'recipe-suggestion', 'random', 'ui-components', 'testing', 'playwright', 'guest-mode']
 ---
 
 # Introduction
 
-![Status: Planned](https://img.shields.io/badge/status-Planned-blue)
+![Status: Implemented](https://img.shields.io/badge/status-Implemented-brightgreen)
 
 This implementation plan adds a random recipe suggestion feature to the Recipe Sharing System. When users click "Surprise Me", the system recommends a random recipe that meets quality criteria (at least 5 likes and 1 review). If no recipes match these constraints, the system falls back to suggesting any published recipe. The suggestion is presented in a modal with options to view the recipe or try again.
 
@@ -19,7 +19,8 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 ### Functional Requirements
 
 - **FREQ-RS-000**: Feature must work for guest users (no blocking, same behavior as pending/suspended users)
-- **FREQ-RS-000-1**: Guest views in Random Recipe feature must NOT increment daily_stats.views (inherited from guest mode behavior)
+- **FREQ-RS-000-1**: Guest views in Random Recipe feature must NOT increment per-recipe view counts (`viewedBy` / `getViewCount`)
+- **FREQ-RS-000-2**: Guest views in Random Recipe feature must NOT increment `daily_stats.views` (inherited from guest mode behavior)
 - **FREQ-RS-001**: Users must be able to access random recipe suggestion from Home page
 - **FREQ-RS-002**: Suggested recipes must meet quality constraints: >= 5 likes AND >= 1 review
 - **FREQ-RS-003**: System must fall back to any published recipe if no recipes match constraints
@@ -74,7 +75,7 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 - **TEST-RS-000**: Feature must include Playwright automated tests (align with guest mode plan's testing approach)
 - **TEST-RS-000-1**: Add Playwright test: GuestModeCompatibility - verify guests can use "Surprise Me" feature
-- **TEST-RS-000-2**: Add Playwright test: AnalyticsNotTrackedForGuest - verify guest recipe suggestions do not increment daily_stats.views
+- **TEST-RS-000-2**: Add Playwright test: AnalyticsNotTrackedForGuest - verify guest recipe suggestions do not increment per-recipe view counts or `daily_stats.views`
 - **TEST-RS-001**: Test with recipes matching constraints (>= 5 likes, >= 1 review)
 - **TEST-RS-002**: Test fallback behavior when no recipes meet constraints
 - **TEST-RS-003**: Test with guest users - verify guest can use "Surprise Me" feature (read-only access only)
@@ -107,10 +108,10 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 | Task     | Description                                                   | Completed | Date       |
 | -------- | ------------------------------------------------------------- | --------- | ---------- |
-| TASK-001 | Update `src/lib/storage.js` - Add `getRandomSuggestion()` function that filters published recipes by constraints (>= 5 likes, >= 1 review) |           |            |
-| TASK-002 | Update `src/lib/storage.js` - Implement fallback logic to use all published recipes when none match constraints |           |            |
-| TASK-003 | Update `src/lib/storage.js` - Return null when no published recipes exist for proper empty state handling |           |            |
-| TASK-004 | Update `src/lib/storage.js` - Export the new `getRandomSuggestion()` function |           |            |
+| TASK-001 | Update `src/lib/storage.js` - Add `getRandomSuggestion()` function that filters published recipes by constraints (>= 5 likes, >= 1 review) | ✅ | 2026-02-14 |
+| TASK-002 | Update `src/lib/storage.js` - Implement fallback logic to use all published recipes when none match constraints | ✅ | 2026-02-14 |
+| TASK-003 | Update `src/lib/storage.js` - Return null when no published recipes exist for proper empty state handling | ✅ | 2026-02-14 |
+| TASK-004 | Update `src/lib/storage.js` - Export the new `getRandomSuggestion()` function | ✅ | 2026-02-14 |
 
 ### Implementation Phase 2: Suggestion Modal Component (Estimated: 2-3 hours)
 
@@ -118,14 +119,14 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 | Task     | Description                                                   | Completed | Date       |
 | -------- | ------------------------------------------------------------- | --------- | ---------- |
-| TASK-005 | Create `src/components/recipe/RecipeSuggestionModal.jsx` - Component structure with Modal wrapper, recipe data display, and action buttons |           |            |
-| TASK-006 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Implement recipe display section with image skeleton loader, title, difficulty badge, likes count, reviews count |           |            |
-| TASK-006-IMG | Add image error handling: onImageError callback to set fallback to placeholder image, prevent console errors |           |            |
-| TASK-007 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Add "View Recipe" button with navigation to RecipeDetail page using recipe ID |           |            |
-| TASK-008 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Add "Try Another" button with onTryAgain handler and loading state |           |            |
-| TASK-009 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Implement empty state with user-friendly message when recipe is null |           |            |
-| TASK-010 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Add close button (X) in modal header and backdrop click handler |           |            |
-| TASK-011 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Style component using Tailwind v4 colors and existing patterns |           |            |
+| TASK-005 | Create `src/components/recipe/RecipeSuggestionModal.jsx` - Component structure with Modal wrapper, recipe data display, and action buttons | ✅ | 2026-02-14 |
+| TASK-006 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Implement recipe display section with image skeleton loader, title, difficulty badge, likes count, reviews count | ✅ | 2026-02-14 |
+| TASK-006-IMG | Add image error handling: onImageError callback to set fallback to placeholder image, prevent console errors | ✅ | 2026-02-14 |
+| TASK-007 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Add "View Recipe" button with navigation to RecipeDetail page using recipe ID | ✅ | 2026-02-14 |
+| TASK-008 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Add "Try Another" button with onTryAgain handler and loading state | ✅ | 2026-02-14 |
+| TASK-009 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Implement empty state with user-friendly message when recipe is null | ✅ | 2026-02-14 |
+| TASK-010 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Add close button (X) in modal header and backdrop click handler | ✅ | 2026-02-14 |
+| TASK-011 | Update `src/components/recipe/RecipeSuggestionModal.jsx` - Style component using Tailwind v4 colors and existing patterns | ✅ | 2026-02-14 |
 
 ### Implementation Phase 3: Home Page Integration (Estimated: 2-3 hours)
 
@@ -133,14 +134,14 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 | Task     | Description                                                   | Completed | Date       |
 | -------- | ------------------------------------------------------------- | --------- | ---------- |
-| TASK-012 | Update `src/pages/Recipe/Home.jsx` - Add state variables: randomSuggestion, isSuggestionModalOpen, isLoadingSuggestion |           |            |
-| TASK-013 | Update `src/pages/Recipe/Home.jsx` - Add `handleSurpriseMe` async function that calls getRandomSuggestion() and handles loading/empty state |           |            |
-| TASK-014 | Update `src/pages/Recipe/Home.jsx` - Add "Surprise Me" button in hero section next to search bar with proper styling |           |            |
-| TASK-015 | Update `src/pages/Recipe/Home.jsx` - Wire up "Surprise Me" button click to handleSurpriseMe function |           |            |
-| TASK-016 | Update `src/pages/Recipe/Home.jsx` - Add RecipeSuggestionModal component to JSX with proper state bindings (isOpen, onClose, recipe, onTryAgain) |           |            |
-| TASK-017 | Update `src/pages/Recipe/Home.jsx` - Add onTryAgain handler that calls handleSurpriseMe again to fetch new suggestion |           |            |
-| TASK-018 | Update `src/pages/Recipe/Home.jsx` - Add onViewRecipe handler that navigates to /recipe/{id} and closes modal |           |            |
-| TASK-019 | Update `src/pages/Recipe/Home.jsx` - Ensure modal state resets when component unmounts or user navigates away |           |            |
+| TASK-012 | Update `src/pages/Recipe/Home.jsx` - Add state variables: randomSuggestion, isSuggestionModalOpen, isLoadingSuggestion | ✅ | 2026-02-14 |
+| TASK-013 | Update `src/pages/Recipe/Home.jsx` - Add `handleSurpriseMe` async function that calls getRandomSuggestion() and handles loading/empty state | ✅ | 2026-02-14 |
+| TASK-014 | Update `src/pages/Recipe/Home.jsx` - Add "Surprise Me" button in hero section next to search bar with proper styling | ✅ | 2026-02-14 |
+| TASK-015 | Update `src/pages/Recipe/Home.jsx` - Wire up "Surprise Me" button click to handleSurpriseMe function | ✅ | 2026-02-14 |
+| TASK-016 | Update `src/pages/Recipe/Home.jsx` - Add RecipeSuggestionModal component to JSX with proper state bindings (isOpen, onClose, recipe, onTryAgain) | ✅ | 2026-02-14 |
+| TASK-017 | Update `src/pages/Recipe/Home.jsx` - Add onTryAgain handler that calls handleSurpriseMe again to fetch new suggestion | ✅ | 2026-02-14 |
+| TASK-018 | Update `src/pages/Recipe/Home.jsx` - Add onViewRecipe handler that navigates to /recipe/{id} and closes modal | ✅ | 2026-02-14 |
+| TASK-019 | Update `src/pages/Recipe/Home.jsx` - Ensure modal state resets when component unmounts or user navigates away | ✅ | 2026-02-14 |
 
 ### Implementation Phase 4: Styling & Polish (Estimated: 1-2 hours)
 
@@ -188,9 +189,21 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 | TASK-042 | Write Playwright test: TryAnotherLoading - click "Try Another" rapidly, verify loading state prevents duplicates |           |            |
 | TASK-043 | Write Playwright test: ModalClose - verify ESC key, backdrop click, and X button all close modal |           |            |
 | TASK-044 | Write Playwright test: GuestModeCompatibility - enter guest mode, verify "Surprise Me" feature works for guests |           |            |
-| TASK-045 | Write Playwright test: GuestAnalyticsNotTracked - enter guest mode, use "Surprise Me", verify daily_stats.views not incremented for guest |           |            |
+| TASK-045 | Write Playwright test: GuestAnalyticsNotTracked - enter guest mode, use "Surprise Me", verify per-recipe view counts and `daily_stats.views` are not incremented for guest |           |            |
 | TASK-046 | Write Playwright test: ImageErrorHandling - set recipe with broken image URL, verify fallback to placeholder image, no console errors |           |            |
 | TASK-047 | Write Playwright test: RandomnessDistribution - click "Try Another" 50 times, verify distribution across recipes (no single recipe > 25%) |           |            |
+
+### Live Testing Results (Playwright MCP Browser Automation) — 2026-02-14
+
+Implementation Phases 1–3 were live-tested using Playwright MCP browser automation tools against the running Vite dev server. The Random Recipe Suggestion feature was tested both as a logged-in user and as a guest user.
+
+| # | Test Scenario | Result | Verification Details |
+|---|---------------|--------|---------------------|
+| T9 | Surprise Me button & modal | **PASS** | Modal opens with recipe image, title, difficulty badge, like/review counts, View Recipe & Try Another buttons |
+| T10 | Try Another in modal | **PASS** | Recipe changed from "Chocolate Lava Cake" (Hard, 1 like) → "Chickpea Salad Wrap" (Easy, 2 likes) |
+| T9-guest | Surprise Me (guest mode) | **PASS** | Button visible and functional in guest mode (tested during T2 verification) |
+| View Recipe nav | View Recipe button | **PASS** | Navigated correctly to `/#/recipes/recipe-10` (Chickpea Salad Wrap detail page) |
+| Console | Console errors check | **PASS** | 0 errors, 0 warnings across all interactions |
 
 ## 3. Alternatives
 
@@ -249,7 +262,9 @@ This implementation plan adds a random recipe suggestion feature to the Recipe S
 
 - **DEP-RS-CROSS-001**: Guest Mode feature (feature-guest-mode-1.md) - If implemented first, Random Recipe must respect guest mode state (isGuest from AuthContext)
 - **DEP-RS-CROSS-002**: If Random Recipe is implemented first, guest compatibility must be added retroactively when Guest Mode is implemented
-- **DEP-RS-CROSS-003**: Playwright test infrastructure - If Guest Mode is implemented first, reuse existing Playwright config and test patterns from `playwright.config.js`- **DEP-RS-CROSS-004**: Design Overhaul feature (design-overhaul-1.md) - Preserves Random Recipe functionality by integrating "Surprise Me" button and RecipeSuggestionModal into new design (TASK-OV-011, TASK-OV-018)
+- **DEP-RS-CROSS-003**: Playwright test infrastructure - If Guest Mode is implemented first, reuse existing Playwright config and test patterns from `playwright.config.js`
+- **DEP-RS-CROSS-004**: Design Overhaul feature (design-overhaul-1.md) - Preserves Random Recipe functionality by integrating "Surprise Me" button and RecipeSuggestionModal into new design (TASK-OV-011, TASK-OV-018)
+
 ### Data Dependencies
 
 - **DEP-RS-009**: `getRecipes()` function from storage.js - Returns all recipes including likedBy arrays
@@ -322,7 +337,7 @@ The Random Recipe Suggestion feature will be considered complete and ready for d
 ### Guest Mode Compatibility
 
 - **AC-RS-032**: Feature works for guest users (no blocking, same behavior as pending/suspended)
-- **AC-RS-033**: Guest views through "Surprise Me" do NOT increment daily_stats.views
+- **AC-RS-033**: Guest views through "Surprise Me" do NOT increment per-recipe view counts or `daily_stats.views`
 - **AC-RS-034**: Guest can use "View Recipe" and "Try Another" buttons without errors
 - **AC-RS-035**: If guest mode is not yet implemented, feature must not break when guest mode is added later
 
@@ -389,7 +404,7 @@ The Random Recipe Suggestion feature is **DONE** when:
   - Verify modal shows "No recipes available" message
   - Verify no recipe card renders
 
-- **TEST-RS-FUNC-004": Random Selection (TASK-029)
+- **TEST-RS-FUNC-004**: Random Selection (TASK-029)
   - Ensure 10+ published recipes exist
   - Click "Try Another" 50-100 times for statistical significance
   - Record suggested recipe IDs and calculate distribution
@@ -462,7 +477,8 @@ The Random Recipe Suggestion feature is **DONE** when:
   - Verify modal displays recipe suggestion
   - Verify "View Recipe" navigates to RecipeDetail
   - Verify "Try Another" loads a new suggestion
-  - Verify no recipe view counts are incremented (check localStorage daily_stats)
+  - Verify guest navigation via "View Recipe" does NOT append guest ID to recipe `viewedBy` or increase `getViewCount`
+  - Verify no guest view counts are incremented in any analytics/local data structures
   - Verify no guest ID appears in daily_stats.activeUsers
 
 ### Responsive Design Testing
@@ -650,7 +666,7 @@ The Random Recipe Suggestion feature is **DONE** when:
 - **RISK-RS-007**: Existing storage.js functions may break with new getRandomSuggestion function
   - **Mitigation**: Review existing function signatures and patterns before implementation (TASK-001)
   - **Impact**: Medium - Could cause regressions in existing features
-  -Validation**: Run existing tests/manual checks after TASK-004
+  - **Validation**: Run existing tests/manual checks after TASK-004
 
 - **RISK-RS-008**: Modal component may not support the specific layout needed for suggestions
   - **Mitigation**: Review Modal component API and existing usage patterns (TASK-005)
@@ -712,24 +728,25 @@ The Random Recipe Suggestion feature is **DONE** when:
 
 ### Project Documentation
 
-- [Storage Data Model](../.serena/memories/storage-data-model.md) - localStorage structure and API
-- [Recipe Features](../.serena/memories/recipe-features.md) - Recipe interaction features and data model
-- [UI Components and Styling](../.serena/memories/ui-components-and-styling.md) - Component library and design system
-- [Project Overview](../.serena/memories/project-overview.md) - Overall project architecture
+- [README](../README.md) - Setup and run instructions
+- [DESIGN](../DESIGN.md) - UI and architecture notes
+- [PROPOSAL](../PROPOSAL.md) - Project scope and goals
+- [`src/lib/storage.js`](../src/lib/storage.js) - Local storage data model and APIs
+- [`src/components/ui/`](../src/components/ui/) - UI primitives used across screens
 
 ### Implementation Notes
 
-- **Guest Mode Compatibility**: Random Recipe respects Guest Mode analytics blocking (AC-RS-033) - guests can use "Surprise Me" but recipe views don't increment daily_stats.views
+- **Guest Mode Compatibility**: Random Recipe respects Guest Mode analytics blocking (AC-RS-033) - guests can use "Surprise Me" but recipe views don't increment per-recipe view counts or `daily_stats.views`
 - **Design Overhaul Compatibility**: RecipeSuggestionModal and "Surprise Me" button are integrated into Design Overhaul (design-overhaul-1.md) through:
   - TASK-OV-011: "Surprise Me" button preserved in new hero design
   - TASK-OV-018: RecipeSuggestionModal integrated into new Home page design
   - PREREQ-OV-002: Random Recipe must be completed before Design Overhaul
-- **Implementation Order**: See [IMPLEMENTATION-SEQUENCE-ANALYSIS.md](./IMPLEMENTATION-SEQUENCE-ANALYSIS.md) for complete compatibility analysis
+- **Implementation Order**: Implement Guest Mode first, then Random Recipe Suggestion, then Design Overhaul to avoid rework and keep UI states aligned
 
 ### Related Implementation Plans
 
 - [Guest Mode Feature](./feature-guest-mode-1.md) - Guest authentication and read-only access patterns
-- [Routing and Layouts](../.serena/memories/routing-layouts.md) - Navigation patterns and routing architecture
+- [`src/layouts/`](../src/layouts/) - Navigation patterns and routing architecture
 
 ### React Documentation
 
@@ -754,3 +771,5 @@ When implementing backend or advanced features, consider:
 6. **Category-specific suggestions**: Add "Surprise Me with Breakfast", "Surprise Me Desserts", etc.
 7. **Seasonal recommendations**: Feature seasonal recipes during holidays or special events
 8. **Trending suggestions**: Combine random selection with trending/popular recipes boost
+
+

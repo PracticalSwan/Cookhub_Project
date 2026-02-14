@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { storage } from '../lib/storage';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
+    const [isGuest, setIsGuest] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -16,6 +17,16 @@ export function AuthProvider({ children }) {
             const currentUser = storage.getCurrentUser();
             if (currentUser) {
                 setUser(currentUser);
+            } else {
+                // Restore guest session from localStorage
+                try {
+                    const guestId = localStorage.getItem('cookhub_guest_id');
+                    if (guestId) {
+                        setIsGuest(true);
+                    }
+                } catch {
+                    // localStorage unavailable
+                }
             }
         } catch (error) {
             console.error("Failed to load user session", error);
@@ -25,11 +36,9 @@ export function AuthProvider({ children }) {
     }, []);
 
     useEffect(() => {
-        if (!user?.id) return;
+        if (!user?.id || isGuest) return;
 
         const handleExit = () => {
-            // No strict need to set inactive here, let timeout or logout handle it
-            // ensuring lastActive is up to date on exit
             storage.updateLastActive(user.id);
         };
 
@@ -77,6 +86,9 @@ export function AuthProvider({ children }) {
         try {
             const loggedUser = storage.login(email, password);
             setUser(loggedUser);
+            // Clear guest state on login
+            setIsGuest(false);
+            try { localStorage.removeItem('cookhub_guest_id'); } catch { /* ignore */ }
             return { success: true };
         } catch (error) {
             return { success: false, error: error.message };
@@ -84,12 +96,17 @@ export function AuthProvider({ children }) {
     };
 
     const logout = () => {
-        storage.logout(user?.id);
+        if (isGuest) {
+            // Exit guest mode
+            setIsGuest(false);
+            try { localStorage.removeItem('cookhub_guest_id'); } catch { /* ignore */ }
+        } else {
+            storage.logout(user?.id);
+        }
         setUser(null);
     };
 
     const signup = (userData) => {
-        // Basic signup logic - in a real app check email dupe
         const newUser = {
             id: `user-${Date.now()}`,
             role: 'user',
@@ -104,12 +121,28 @@ export function AuthProvider({ children }) {
             type: 'user',
             text: `${newUser.username} joined the platform`
         });
-        // Record new user for daily stats tracking
         storage.recordNewUser(newUser.id, newUser.role);
-        // Auto login
+        // Clear guest state on signup
+        setIsGuest(false);
+        try { localStorage.removeItem('cookhub_guest_id'); } catch { /* ignore */ }
         const loggedInUser = storage.login(userData.email, userData.password);
         setUser(loggedInUser);
     };
+
+    const enterGuestMode = useCallback(() => {
+        try {
+            storage.getOrCreateGuestId();
+            setIsGuest(true);
+            setUser(null);
+        } catch {
+            console.error('Failed to enter guest mode - localStorage may be unavailable');
+        }
+    }, []);
+
+    const exitGuestMode = useCallback(() => {
+        setIsGuest(false);
+        try { localStorage.removeItem('cookhub_guest_id'); } catch { /* ignore */ }
+    }, []);
 
     const updateProfile = (updates) => {
         if (!user) return;
@@ -122,19 +155,22 @@ export function AuthProvider({ children }) {
     const isAdmin = user?.role === 'admin';
     const isPending = user?.status === 'pending';
     const isSuspended = user?.status === 'suspended';
-    const canInteract = Boolean(user && user.status === 'active' && !isAdmin);
+    const canInteract = Boolean(user && user.status === 'active' && !isAdmin && !isGuest);
 
     const value = {
         user,
         loading,
         isAdmin,
+        isGuest,
         isPending,
         isSuspended,
         canInteract,
         login,
         logout,
         signup,
-        updateProfile
+        updateProfile,
+        enterGuestMode,
+        exitGuestMode
     };
 
     return (

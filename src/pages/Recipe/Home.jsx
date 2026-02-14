@@ -3,8 +3,9 @@ import { storage } from '../../lib/storage';
 import { RecipeCard } from '../../components/recipe/RecipeCard';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { Search, X } from 'lucide-react';
+import { Search, X, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { RecipeSuggestionModal } from '../../components/recipe/RecipeSuggestionModal';
 
 export function Home() {
     const [recipes, setRecipes] = useState(() => {
@@ -12,6 +13,8 @@ export function Home() {
         return allRecipes.filter(r => r.status === 'published');
     });
     const [searchTerm, setSearchTerm] = useState('');
+    const [randomSuggestion, setRandomSuggestion] = useState(null);
+    const [isSuggestionModalOpen, setIsSuggestionModalOpen] = useState(false);
     const navigate = useNavigate();
 
     const loadRecipes = useCallback(() => {
@@ -35,6 +38,17 @@ export function Home() {
         if (searchTerm.trim()) {
             navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
         }
+    };
+
+    const handleSurpriseMe = () => {
+        const suggestion = storage.getRandomSuggestion();
+        setRandomSuggestion(suggestion);
+        setIsSuggestionModalOpen(true);
+    };
+
+    const handleTryAnother = () => {
+        const suggestion = storage.getRandomSuggestion();
+        setRandomSuggestion(suggestion);
     };
 
     return (
@@ -65,6 +79,15 @@ export function Home() {
                             </button>
                         )}
                     </form>
+
+                    <Button
+                        variant="outline"
+                        className="gap-2 bg-white/10 border-white/30 text-white hover:bg-white/20"
+                        onClick={handleSurpriseMe}
+                    >
+                        <Sparkles className="h-4 w-4" />
+                        Surprise Me!
+                    </Button>
                 </div>
             </section>
 
@@ -85,6 +108,13 @@ export function Home() {
                     )}
                 </div>
             </section>
+
+            <RecipeSuggestionModal
+                isOpen={isSuggestionModalOpen}
+                onClose={() => setIsSuggestionModalOpen(false)}
+                suggestion={randomSuggestion}
+                onTryAnother={handleTryAnother}
+            />
         </div>
     );
 }

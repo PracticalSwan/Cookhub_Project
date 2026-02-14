@@ -69,29 +69,37 @@
 
 ### 3. Design Overhaul ✅ Ready
 **Status**: Blocked until both features complete (Phase 3)
-**Version**: v1.3 (February 11, 2026) - Updated with web-testing skill alignment
+**Version**: v1.4 (February 12, 2026) - Enhanced with skill patterns from frontend-design, react-development, and web-testing
 **Acceptance Criteria**: 32 ACs
 **Implementation Tasks**: 128 tasks across 14 phases
 
 **Key Features:**
 - Complete UI overhaul for all 13 screens
-- Modern Stitch design patterns
-- Hybrid color system (#C8102E + #137fec)
+- Modern Stitch design patterns (60-30-10 color rule, design tokens)
+- Hybrid color system (#C8102E + #137fec) with CSS variables
+- Performance optimization (React.memo, useCallback, code splitting, custom hooks)
 - Responsive design (mobile, tablet, desktop)
-- Accessibility (WCAG AA compliance)
+- Accessibility (WCAG AA compliance, 9-item checklist)
 - Component enhancements (no new components)
 
-**Testing Alignment (v1.3 Update):**
+**v1.4 Enhancements (2026-02-12):**
+- **Frontend Design**: 60-30-10 color rule, design tokens CSS variables, comprehensive accessibility checklist
+- **React Development**: Performance patterns (memoization, hooks, code splitting), useFormValidation/useDebounce hooks, component composition examples
+- **Testing Execution**: 17-step execution order matrix (Week 1 infrastructure, Week 2 non-regression), test maintenance guidelines
+- **Testing Alignment**: ~229 estimated test cases covering all testing pillars (visual, user flow, responsive, a11y, dynamic data, cross-browser, performance)
+
+**Testing Alignment (v1.3 Update + v1.4 Enhancement):**
 - Aligned with [web-testing skill](../../.copilot/skills/web-testing/) guidelines
-- ~229 estimated test cases covering all testing pillars
+- Added execution order matrix aligning tests with implementation phases
+- Added test maintenance guidelines (baseline updates, flaky test resolution)
 - Page Object Model architecture (8 Page Object classes)
 - Fixtures for authentication state reuse (admin, user, guest)
 - Visual regression testing (39 baseline screenshots)
-- Accessibility testing via axe-core (10 a11y categories)
+- Accessibility testing via axe-core (9-item checklist from frontend-design skill)
 - Responsive testing (91 checks across 7 viewports)
 - Performance monitoring (Core Web Vitals with Chrome DevTools)
 - Console and network error tracking patterns
-- Comprehensive testing checklist (6 domains, 45 total items)
+- Comprehensive testing checklist (6 domains, 45+ total items)
 
 **Integration:**
 - TASK-OV-002, TASK-OV-006: "Continue as Guest" buttons preserved
@@ -163,3 +171,8 @@
 ---
 
 **Project Status**: ✅ Implementation planning complete, ready for Phase 1 execution
+## Memory Update (2026-02-14)
+
+- Guest ID format in planning is guest-{randomId}.
+- Planning decision: guest views are excluded from per-recipe view counts (viewedBy / getViewCount) and from daily_stats.views.
+- Design Overhaul prerequisite checks now explicitly verify guest exclusion across per-recipe views, daily_stats.views, and activeUsers.

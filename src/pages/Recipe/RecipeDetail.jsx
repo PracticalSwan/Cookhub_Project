@@ -12,7 +12,7 @@ import { cn, normalizeCategories } from '../../lib/utils';
 export function RecipeDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user, canInteract, isPending, isSuspended, isAdmin } = useAuth();
+    const { user, canInteract, isPending, isSuspended, isAdmin, isGuest } = useAuth();
     const [recipe, setRecipe] = useState(null);
     const [author, setAuthor] = useState(null);
     const [reviews, setReviews] = useState([]);
@@ -335,7 +335,7 @@ export function RecipeDetail() {
             <div className="pt-6 border-t border-cool-gray-20">
                 <h3 className="text-xl font-bold mb-4">Reviews ({reviews.length})</h3>
 
-                {(isPending || isSuspended) && (
+                {(isPending || isSuspended || isGuest) && (
                     <div
                         className={
                             isSuspended
@@ -344,8 +344,10 @@ export function RecipeDetail() {
                         }
                     >
                         {isSuspended
-                            ? "Your account is suspended. You can browse recipes, but you can’t like, save, or submit reviews."
-                            : "Your account is pending approval. You can browse recipes as a guest, but you can’t like, save, or submit reviews yet."}
+                            ? "Your account is suspended. You can browse recipes, but you can't like, save, or submit reviews."
+                            : isGuest
+                                ? "You're browsing as a guest. Login or sign up to like, save, and review recipes."
+                                : "Your account is pending approval. You can browse recipes as a guest, but you can't like, save, or submit reviews yet."}
                     </div>
                 )}
 

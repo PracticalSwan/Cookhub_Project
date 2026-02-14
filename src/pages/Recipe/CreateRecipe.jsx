@@ -11,7 +11,7 @@ import { Plus, Trash2, UploadCloud, ArrowLeft } from 'lucide-react';
 export function CreateRecipe() {
     const navigate = useNavigate();
     const { id } = useParams(); // If id exists, we're in edit mode
-    const { user, canInteract, isPending, isSuspended } = useAuth();
+    const { user, canInteract, isPending, isSuspended, isGuest } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const isEditMode = Boolean(id);
     const isBlocked = isSuspended || isPending;
@@ -255,10 +255,25 @@ export function CreateRecipe() {
         }
     };
 
+    if (isGuest) {
+        return (
+            <div className="max-w-2xl mx-auto space-y-4 animate-page-in">
+                <h1 className="text-2xl font-bold text-cool-gray-90">Login Required</h1>
+                <p className="text-cool-gray-60">
+                    You need an account to create and share recipes. Login or sign up to get started!
+                </p>
+                <div className="flex gap-3">
+                    <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>
+                    <Button variant="outline" onClick={() => navigate('/signup')}>Sign Up</Button>
+                </div>
+            </div>
+        );
+    }
+
     if (!canInteract || isBlocked) {
         return (
             <div className="max-w-2xl mx-auto space-y-4 animate-page-in">
-                <h1 className="text-2xl font-bold text-cool-gray-90">Guest Mode</h1>
+                <h1 className="text-2xl font-bold text-cool-gray-90">Access Restricted</h1>
                 <p className={isSuspended ? "text-red-600" : "text-cool-gray-60"}>
                     {isSuspended
                         ? "Your account is suspended. You can browse recipes, but you can’t create or edit recipes."

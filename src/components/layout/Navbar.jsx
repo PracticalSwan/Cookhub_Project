@@ -2,10 +2,11 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
-import { LogOut, User, PlusCircle, Search } from 'lucide-react';
+import { LogOut, User, PlusCircle, Search, Eye } from 'lucide-react';
+import { Badge } from '../ui/Badge';
 
 export function Navbar() {
-    const { user, logout, canInteract } = useAuth();
+    const { user, logout, canInteract, isGuest } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -29,28 +30,45 @@ export function Navbar() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    {canInteract && (
-                        <Link to="/recipes/create">
-                            <Button size="sm" variant="primary" className="gap-2">
-                                <PlusCircle className="h-4 w-4" />
-                                <span>Create</span>
-                            </Button>
-                        </Link>
-                    )}
-
-                    <Link to="/profile">
-                        <Button variant="ghost" size="icon" className="rounded-full" aria-label="View Profile">
-                            {user?.avatar ? (
-                                <img src={user.avatar} alt="Avatar" className="h-8 w-8 rounded-full object-cover border border-cool-gray-20" />
-                            ) : (
-                                <User className="h-5 w-5" />
+                    {isGuest ? (
+                        <>
+                            <Badge variant="secondary" className="gap-1.5">
+                                <Eye className="h-3 w-3" />
+                                Guest
+                            </Badge>
+                            <Link to="/login">
+                                <Button size="sm" variant="outline">Login</Button>
+                            </Link>
+                            <Link to="/signup">
+                                <Button size="sm" variant="primary">Sign Up</Button>
+                            </Link>
+                        </>
+                    ) : (
+                        <>
+                            {canInteract && (
+                                <Link to="/recipes/create">
+                                    <Button size="sm" variant="primary" className="gap-2">
+                                        <PlusCircle className="h-4 w-4" />
+                                        <span>Create</span>
+                                    </Button>
+                                </Link>
                             )}
-                        </Button>
-                    </Link>
 
-                    <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout" aria-label="Logout">
-                        <LogOut className="h-5 w-5" />
-                    </Button>
+                            <Link to="/profile">
+                                <Button variant="ghost" size="icon" className="rounded-full" aria-label="View Profile">
+                                    {user?.avatar ? (
+                                        <img src={user.avatar} alt="Avatar" className="h-8 w-8 rounded-full object-cover border border-cool-gray-20" />
+                                    ) : (
+                                        <User className="h-5 w-5" />
+                                    )}
+                                </Button>
+                            </Link>
+
+                            <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout" aria-label="Logout">
+                                <LogOut className="h-5 w-5" />
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
         </nav>

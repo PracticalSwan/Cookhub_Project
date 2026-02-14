@@ -13,11 +13,27 @@ import { MapPin, Calendar, Settings, Check, Edit, Trash2 } from 'lucide-react';
 export function Profile() {
     const { userId } = useParams();
     const navigate = useNavigate();
-    const { user: currentUser, updateProfile, canInteract, isPending, isSuspended } = useAuth();
+    const { user: currentUser, updateProfile, canInteract, isPending, isSuspended, isGuest } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const defaultTab = searchParams.get('tab') || 'recipes';
 
     const isOwnProfile = !userId || (currentUser && currentUser.id === userId);
+
+    // Guest users cannot view their own profile (they don't have one)
+    if (isGuest && isOwnProfile) {
+        return (
+            <div className="max-w-2xl mx-auto space-y-4 animate-page-in text-center py-16">
+                <h1 className="text-2xl font-bold text-cool-gray-90">Login to View Your Profile</h1>
+                <p className="text-cool-gray-60">
+                    Create an account to build your profile, save recipes, and share your own creations.
+                </p>
+                <div className="flex justify-center gap-3">
+                    <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>
+                    <Button variant="outline" onClick={() => navigate('/signup')}>Sign Up</Button>
+                </div>
+            </div>
+        );
+    }
 
     const profileUser = useMemo(() => {
         if (isOwnProfile) {
